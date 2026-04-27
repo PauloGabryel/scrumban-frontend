@@ -11,7 +11,7 @@ const Auth = {
         this.checkSession();
     },
 
-    // ---- Sessão (token fica em localStorage, não localStorage) ----
+    // ---- Sessão ----
     checkSession() {
         const savedUser  = localStorage.getItem('scrumban_user');
         const savedToken = localStorage.getItem('scrumban_token');
@@ -81,6 +81,9 @@ const Auth = {
         if (!name || !email || !password || !confirm) {
             this._msg('Por favor, preencha todos os campos', 'error', msgEl); return;
         }
+        if (password.length < 6) {
+            this._msg('A senha deve ter no mínimo 6 caracteres', 'error', msgEl); return;
+        }
         if (password !== confirm) {
             this._msg('As senhas não conferem', 'error', msgEl); return;
         }
@@ -105,6 +108,76 @@ const Auth = {
         } catch (e) {
             this._msg('Erro de conexão. Backend está rodando?', 'error', msgEl);
             if (btn) { btn.disabled = false; btn.textContent = 'Criar Conta'; }
+        }
+    },
+
+    // ---- Esqueci a Senha ----
+    async forgotPassword() {
+        const email = (document.getElementById('forgotEmail') || {}).value || '';
+        const msgEl = document.getElementById('forgotMessage');
+        const btn   = document.querySelector('#forgotForm button[type="submit"]');
+
+        if (!email) {
+            this._msg('Por favor, informe seu email', 'error', msgEl); return;
+        }
+        if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+        try {
+            const res  = await fetch(`${API_URL}/auth/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+
+            this._msg(data.message || 'Email enviado!', res.ok ? 'success' : 'error', msgEl);
+            if (res.ok) {
+                if (btn) { btn.textContent = 'Email enviado!'; }
+            } else {
+                if (btn) { btn.disabled = false; btn.textContent = 'Enviar Link de Redefinição'; }
+            }
+        } catch (e) {
+            this._msg('Erro de conexão. Backend está rodando?', 'error', msgEl);
+            if (btn) { btn.disabled = false; btn.textContent = 'Enviar Link de Redefinição'; }
+        }
+    },
+
+    // ---- Redefinir Senha ----
+    async resetPassword(resetToken) {
+        const password = (document.getElementById('resetPassword') || {}).value || '';
+        const confirm  = (document.getElementById('resetConfirm')  || {}).value || '';
+        const msgEl    = document.getElementById('resetMessage');
+        const btn      = document.querySelector('#resetForm button[type="submit"]');
+
+        if (password.length < 6) {
+            this._msg('A senha deve ter no mínimo 6 caracteres', 'error', msgEl); return;
+        }
+        if (password !== confirm) {
+            this._msg('As senhas não conferem', 'error', msgEl); return;
+        }
+        if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+        try {
+            const res  = await fetch(`${API_URL}/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: resetToken, password, passwordConfirm: confirm }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                this._msg('✅ ' + data.message, 'success', msgEl);
+                setTimeout(() => {
+                    history.replaceState(null, '', window.location.pathname);
+                    if (typeof switchPanel === 'function') switchPanel('login');
+                }, 2000);
+            } else {
+                this._msg(data.message || 'Erro ao redefinir senha', 'error', msgEl);
+                if (btn) { btn.disabled = false; btn.textContent = 'Redefinir Senha'; }
+            }
+        } catch (e) {
+            this._msg('Erro de conexão. Backend está rodando?', 'error', msgEl);
+            if (btn) { btn.disabled = false; btn.textContent = 'Redefinir Senha'; }
         }
     },
 
