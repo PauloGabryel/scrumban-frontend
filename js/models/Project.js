@@ -82,27 +82,28 @@ class Project {
 
     // ---- Backlog ----
     getBacklogStats() {
-        const total = this.backlog.length;
-        const done  = this.backlog.filter(i => i.status === 'done').length;
-        return { total, done, pending: total - done };
+        const total    = this.backlog.length;
+        const done     = this.backlog.filter(i => i.status === 'done').length;
+        const inSprints = this.backlog.filter(i => i.sprintId).length;
+        return { total, done, pending: total - done, inSprints };
     }
 
     addBacklogItem(item) {
         this.backlog.push(item);
-        this.save();
+        // Não chama save() aqui — o caller (BacklogView.saveItem) já chama p.save()
     }
 
     updateBacklogItem(itemId, changes) {
         const idx = this.backlog.findIndex(i => i.id === itemId);
         if (idx !== -1) {
             this.backlog[idx] = { ...this.backlog[idx], ...changes };
-            this.save();
+            // Não chama save() aqui — o caller já chama p.save()
         }
     }
 
     removeBacklogItem(itemId) {
         this.backlog = this.backlog.filter(i => i.id !== itemId);
-        this.save();
+        // Não chama save() aqui — o caller já chama p.save()
     }
 
     // ---- Sprints ----
@@ -112,20 +113,20 @@ class Project {
 
     addSprint(sprint) {
         this.sprints.push(sprint);
-        this.save();
+        // Não chama save() aqui — o caller já chama p.save()
     }
 
     updateSprint(sprintId, changes) {
         const idx = this.sprints.findIndex(s => s.id === sprintId);
         if (idx !== -1) {
             this.sprints[idx] = { ...this.sprints[idx], ...changes };
-            this.save();
+            // Não chama save() aqui — o caller já chama p.save()
         }
     }
 
     removeSprint(sprintId) {
         this.sprints = this.sprints.filter(s => s.id !== sprintId);
-        this.save();
+        // Não chama save() aqui — o caller já chama p.save()
     }
 
     // ---- Cerimônias ----

@@ -93,6 +93,16 @@ exports.updateProject = async (req, res) => {
   try {
     const { name, description, data } = req.body;
 
+    // Verifica se o usuário é membro do projeto
+    const { data: membership } = await supabase
+      .from('project_members')
+      .select('role')
+      .eq('project_id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (!membership) return res.status(403).json({ message: 'Você não tem acesso a este projeto' });
+
     const { data: proj } = await supabase
       .from('projects')
       .select('creator_id')
@@ -100,7 +110,13 @@ exports.updateProject = async (req, res) => {
       .single();
 
     if (!proj) return res.status(404).json({ message: 'Projeto não encontrado' });
-    if (proj.creator_id !== req.user.id) return res.status(403).json({ message: 'Apenas o criador pode editar o projeto' });
+
+    // Apenas nome e descrição são restritos ao criador/admin
+    // O campo "data" (backlog, sprints, kanban) pode ser salvo por qualquer membro
+    const isCreatorOrAdmin = proj.creator_id === req.user.id || membership.role === 'admin';
+    if ((name !== undefined || description !== undefined) && !isCreatorOrAdmin) {
+      return res.status(403).json({ message: 'Apenas o criador ou admin pode renomear o projeto' });
+    }
 
     const updates = { updated_at: new Date().toISOString() };
     if (name        !== undefined) updates.name        = name;
