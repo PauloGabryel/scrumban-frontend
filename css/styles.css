@@ -1793,9 +1793,10 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding-bottom: 2px;
+    flex-wrap: nowrap;
 }
 .project-tabs::-webkit-scrollbar { display: none; }
-.tab-btn { padding: 8px 12px; font-size: 0.78rem; }
+.tab-btn { padding: 8px 12px; font-size: 0.78rem; flex-shrink: 0; white-space: nowrap; }
 .tab-btn svg { display: none; }
 
 /* ── Backlog items: stack on mobile ── */
