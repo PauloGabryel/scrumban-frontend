@@ -1931,13 +1931,16 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 
 /* ── Show hamburger on small screens ── */
 @media (max-width: 767px) {
-    .btn-hamburger { display: flex; }
+    .btn-hamburger { display: flex; flex-shrink: 0; }
     /* Hide desktop nav items that move to drawer */
-    .header-right .user-display,
     #btnLogout,
-    #btnDarkMode {
+    #btnDarkMode,
+    #notifWrapper {
         display: none !important;
     }
+    /* Mostrar apenas o avatar (sem nome) no mobile */
+    .header-right .user-display { display: flex !important; }
+    .nav-user-name { display: none !important; }
 }
 
 /* ========================================
@@ -2650,7 +2653,6 @@ body.dark-mode .toast.success { border-color: var(--dm-success); }
 body.dark-mode .toast.error   { border-color: var(--dm-danger); }
 body.dark-mode .toast.warning { border-color: var(--dm-warning); }
 body.dark-mode .toast.info    { border-color: var(--dm-primary); }
-body.dark-mode .toast-message { color: var(--dm-text-strong); }
 body.dark-mode .toast-close { color: var(--dm-muted); }
 body.dark-mode .toast-close:hover { color: var(--dm-text); }
 

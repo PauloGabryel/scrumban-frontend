@@ -25,8 +25,7 @@ const App = {
         const name     = this.currentUser.name || '?';
         const email    = (this.currentUser.email || '').trim().toLowerCase();
         const initials = name.trim().split(' ').filter(Boolean)
-            .map((p, i, a) => (i === 0 || i === a.length - 1) ? p[0] : null)
-            .filter(Boolean).join('').toUpperCase().slice(0, 2);
+            .slice(0, 2).map(p => p[0]).join('').toUpperCase();
         el.innerHTML = `
             <span class="nav-user-avatar" id="navUserAvatar" title="${name}">
                 <span class="nav-user-initials">${initials}</span>
