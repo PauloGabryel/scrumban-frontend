@@ -11,34 +11,11 @@ const App = {
         if (!Auth.requireAuth()) return;
         this.currentUser = Auth.currentUser;
 
-        // Valida o token com o backend antes de continuar
-        const tokenOk = await this._validateToken();
-        if (!tokenOk) return; // _validateToken já redireciona para login
-
         this.updateUserDisplay();
         this.setupEventListeners();
         this.initDarkMode();
         await this.navigateTo('home');
         await this.renderNotifications();
-    },
-
-    async _validateToken() {
-        try {
-            const res = await fetch(`${API_URL}/auth/verify`, {
-                headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
-            });
-            if (res.status === 401 || res.status === 403) {
-                sessionStorage.removeItem('scrumban_user');
-                sessionStorage.removeItem('scrumban_token');
-                window.location.href = 'login.html';
-                return false;
-            }
-            return true;
-        } catch(e) {
-            // Backend offline — deixa o app tentar carregar mesmo assim
-            console.warn('[App] Não foi possível validar token (backend offline?):', e.message);
-            return true;
-        }
     },
 
     // ---- Exibição do usuário ----

@@ -119,6 +119,7 @@ const Auth = {
     requireAuth() {
         const savedUser  = localStorage.getItem('scrumban_user');
         const savedToken = localStorage.getItem('scrumban_token');
+        console.log('[Auth.requireAuth] user:', savedUser, '| token:', savedToken ? 'existe' : 'VAZIO');
         if (!savedUser || !savedToken) {
             window.location.href = 'login.html';
             return false;
