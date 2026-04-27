@@ -1,13 +1,16 @@
 const nodemailer = require('nodemailer');
 
-// Retorna null se email não estiver configurado
+// Cria o transporter apenas se as variáveis reais estiverem configuradas
 const createTransporter = () => {
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASSWORD;
 
-  // Se ainda são os valores placeholder, não cria o transporter
-  if (!user || !pass || user.includes('seu_email') || pass.includes('sua_senha')) {
-    return null;
+  if (
+    !user || !pass ||
+    user.includes('seu_email') ||
+    pass.includes('sua_senha')
+  ) {
+    return null; // modo dev / variáveis não configuradas
   }
 
   return nodemailer.createTransport({
@@ -21,10 +24,10 @@ const createTransporter = () => {
 const sendVerificationEmail = async (toEmail, token, userName) => {
   try {
     const transporter = createTransporter();
-    if (!transporter) return false; // email não configurado → modo dev
+    if (!transporter) return false;
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
-    const verifyLink = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${token}`;
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const verifyLink = `${backendUrl}/api/auth/verify-email?token=${token}`;
 
     await transporter.sendMail({
       from: `"Scrumban Manager" <${process.env.EMAIL_USER}>`,
@@ -62,8 +65,9 @@ const sendVerificationEmail = async (toEmail, token, userName) => {
 const sendPasswordResetEmail = async (toEmail, token, userName) => {
   try {
     const transporter = createTransporter();
+
     if (!transporter) {
-      // Email não configurado: loga o link no console para debug
+      // Modo dev: loga o link no console
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5500';
       console.log(`[DEV] Link de reset para ${toEmail}: ${frontendUrl}/login.html?reset_token=${token}`);
       return false;
