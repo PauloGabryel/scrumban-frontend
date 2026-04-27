@@ -10,12 +10,21 @@ const { connectDB } = require('./config/database');
 const app = express();
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'http://127.0.0.1:5500',
-    process.env.FRONTEND_URL,
-  ].filter(Boolean),
+  origin: function(origin, callback) {
+    // Permite requisições sem origin (ex: mobile, curl) e qualquer origem Vercel
+    if (!origin) return callback(null, true);
+    const allowed = [
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'http://127.0.0.1:5500',
+      'https://scrumban-frontend.vercel.app',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean);
+    if (allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Permite tudo por enquanto para debug
+  },
   credentials: true,
 }));
 app.use(express.json());

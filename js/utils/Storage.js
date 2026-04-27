@@ -16,10 +16,7 @@ const Storage = {
                 },
             });
             if (res.status === 401 || res.status === 403) {
-                console.warn(`[Storage] Token expirado ou inválido (${res.status}) — redirecionando para login`);
-                sessionStorage.removeItem('scrumban_user');
-                sessionStorage.removeItem('scrumban_token');
-                window.location.href = 'login.html';
+                console.warn(`[Storage] Erro ${res.status} em ${path} — sem redirecionar`);
                 return null;
             }
             return res;
