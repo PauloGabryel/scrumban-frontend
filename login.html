@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Scrumban Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { margin:0; padding:0; transition: background 0.3s ease; }
+
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -120px; left: -120px;
+            width: 480px; height: 480px;
+            background: radial-gradient(circle, rgba(0,123,255,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .auth-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        body.dark-mode .auth-wrapper {
+            background: linear-gradient(135deg, #030712 0%, #0d1b2a 50%, #030712 100%);
+        }
+
+        /* Dark mode floating button */
+        .dark-toggle-floating {
+            position: fixed;
+            top: 16px; right: 16px;
+            z-index: 999;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+        }
+        .dark-toggle-floating:hover {
+            background: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
+        }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05);
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        body.dark-mode .auth-card {
+            background: #161b22;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+        }
+
+        .auth-tabs { display: flex; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+        body.dark-mode .auth-tabs { background: #0d1117; border-bottom-color: #30363d; }
+
+        .auth-tab {
+            flex: 1; padding: 16px; text-align: center;
+            font-size: 14px; font-weight: 600; color: #64748b;
+            cursor: pointer; border: none; background: transparent;
+            transition: all 0.25s ease; border-bottom: 3px solid transparent;
+            font-family: 'Inter', sans-serif;
+        }
+        .auth-tab.active { color: #007bff; background: #fff; border-bottom-color: #007bff; }
+        .auth-tab:hover:not(.active) { color: #334155; background: #e2e8f0; }
+
+        body.dark-mode .auth-tab { color: #8b949e; }
+        body.dark-mode .auth-tab.active { color: #4d9fff; background: #161b22; border-bottom-color: #4d9fff; }
+        body.dark-mode .auth-tab:hover:not(.active) { color: #c9d1d9; background: #21262d; }
+
+        .auth-panels { position: relative; overflow: hidden; }
+        .auth-panel { padding: 32px; display: none; animation: fadeIn 0.3s ease; }
+        .auth-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+        .auth-header { text-align: center; margin-bottom: 28px; }
+        .auth-logo {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, #007bff, #4d9fff);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0,123,255,0.35);
+        }
+        .auth-header h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 6px; letter-spacing:-0.02em; }
+        .auth-header p  { font-size: 14px; color: #64748b; margin: 0; }
+        body.dark-mode .auth-header h1 { color: #f1f5f9; }
+        body.dark-mode .auth-header p  { color: #8b949e; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        body.dark-mode .form-group label { color: #8b949e; }
+
+        .form-group input {
+            width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif; color: #0f172a;
+            transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; background: #fafafa;
+        }
+        .form-group input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.12); background: #fff; }
+        body.dark-mode .form-group input { background: #0d1117; border-color: #30363d; color: #e2e8f0; }
+        body.dark-mode .form-group input:focus { border-color: #4d9fff; box-shadow: 0 0 0 3px rgba(77,159,255,0.15); background: #0d1117; }
+        body.dark-mode .form-group input::placeholder { color: #484f58; }
+
+        .btn-auth {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease; margin-top: 6px;
+            box-shadow: 0 4px 14px rgba(0,123,255,0.3);
+        }
+        .btn-auth:hover { box-shadow: 0 6px 20px rgba(0,123,255,0.45); transform: translateY(-1px); }
+        .btn-auth:active { transform: translateY(0); }
+        .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .auth-switch {
+            text-align: center; padding: 16px 32px 28px; font-size: 13px;
+            color: #64748b; border-top: 1px solid #f1f5f9;
+        }
+        body.dark-mode .auth-switch { color: #8b949e; border-top-color: #21262d; }
+        .auth-switch a { color: #007bff; font-weight: 700; text-decoration: none; cursor: pointer; }
+        body.dark-mode .auth-switch a { color: #4d9fff; }
+        .auth-switch a:hover { text-decoration: underline; }
+
+        .password-hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        body.dark-mode .password-hint { color: #484f58; }
+
+        .auth-message {
+            display: none; padding: 10px 14px; border-radius: 8px;
+            font-size: 13px; margin-bottom: 16px; font-weight: 500;
+        }
+        .auth-message.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .auth-message.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        body.dark-mode .auth-message.error   { background: #2a0a0a; color: #f87171; border-color: #7f1d1d; }
+        body.dark-mode .auth-message.success { background: #052e16; color: #4ade80; border-color: #14532d; }
+    </style>
+</head>
+<body>
+
+<!-- Botão de modo escuro flutuante -->
+<button class="dark-toggle-floating" onclick="toggleDarkMode()">
+    <svg id="iconDarkLogin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+    <svg id="iconLightLogin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <span id="darkLabelLogin">Escuro</span>
+</button>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+            <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Criar Conta</button>
+        </div>
+        <div class="auth-panels">
+            <!-- LOGIN -->
+            <div class="auth-panel active" id="panelLogin">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                    <h1>Scrumban Manager</h1>
+                    <p>Gerencie projetos ágeis com facilidade</p>
+                </div>
+                <div id="loginMessage" class="auth-message"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="seu@email.com" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Senha</label>
+                        <input type="password" id="loginPassword" placeholder="Digite sua senha" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-auth">Entrar</button>
+                </form>
+            </div>
+            <!-- SIGNUP -->
+            <div class="auth-panel" id="panelSignup">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                    <h1>Scrumban Manager</h1>
+                    <p>Crie uma conta para começar</p>
+                </div>
+                <div id="signupMessage" class="auth-message"></div>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">Nome Completo</label>
+                        <input type="text" id="signupName" placeholder="Digite seu nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" placeholder="seu@email.com" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Senha</label>
+                        <input type="password" id="signupPassword" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+                        <div class="password-hint">Mínimo 6 caracteres</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupConfirm">Confirmar Senha</label>
+                        <input type="password" id="signupConfirm" placeholder="Confirme sua senha" required autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn-auth">Criar Conta</button>
+                </form>
+            </div>
+        </div>
+        <div class="auth-switch" id="authSwitch">
+            Não tem uma conta? <a onclick="switchTab('signup')">Crie aqui</a>
+        </div>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/utils/Storage.js"></script>
+<script>
+    /* ---- Dark Mode ---- */
+    function applyDark(isDark) {
+        document.body.classList.toggle('dark-mode', isDark);
+        document.getElementById('iconDarkLogin').style.display  = isDark ? 'none' : '';
+        document.getElementById('iconLightLogin').style.display = isDark ? ''     : 'none';
+        document.getElementById('darkLabelLogin').textContent   = isDark ? 'Claro' : 'Escuro';
+    }
+    function toggleDarkMode() {
+        const isDark = !document.body.classList.contains('dark-mode');
+        localStorage.setItem('scrumban_dark_mode', isDark);
+        applyDark(isDark);
+    }
+    (function() {
+        const saved = localStorage.getItem('scrumban_dark_mode');
+        if (saved === 'true') applyDark(true);
+    })();
+
+    /* ---- Tabs ---- */
+    function switchTab(tab) {
+        const isLogin = tab === 'login';
+        document.getElementById('tabLogin').classList.toggle('active', isLogin);
+        document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+        document.getElementById('panelLogin').classList.toggle('active', isLogin);
+        document.getElementById('panelSignup').classList.toggle('active', !isLogin);
+        document.getElementById('authSwitch').innerHTML = isLogin
+            ? 'Não tem uma conta? <a onclick="switchTab(\'signup\')">Crie aqui</a>'
+            : 'Já tem uma conta? <a onclick="switchTab(\'login\')">Faça login</a>';
+    }
+    const urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab === 'signup') switchTab('signup');
+
+    function showMessage(id, msg, type) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = 'auth-message ' + type;
+        el.style.display = 'block';
+        if (type === 'error') setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    function saveSession(user, token) {
+        const safe = { id: user.id || user._id || '', name: user.name || user.username || '', username: user.name || user.username || '', email: user.email || '' };
+        sessionStorage.setItem('scrumban_user', JSON.stringify(safe));
+        sessionStorage.setItem('scrumban_token', token);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (!email || !password) { showMessage('loginMessage', 'Por favor, preencha email e senha', 'error'); return; }
+        btn.disabled = true; btn.textContent = 'Entrando...';
+        try {
+            const response = await fetch(API_URL + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+            const data = await response.json();
+            if (response.ok) { saveSession(data.user, data.token); showMessage('loginMessage', '✅ Login realizado!', 'success'); setTimeout(() => { window.location.href = 'index.html'; }, 800); }
+            else { showMessage('loginMessage', data.message || 'Email ou senha incorretos', 'error'); btn.disabled = false; btn.textContent = 'Entrar'; }
+        } catch (err) { showMessage('loginMessage', 'Erro de conexão. Backend está rodando?', 'error'); btn.disabled = false; btn.textContent = 'Entrar'; }
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const confirm = document.getElementById('signupConfirm').value;
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (!name || !email || !password || !confirm) { showMessage('signupMessage', 'Por favor, preencha todos os campos', 'error'); return; }
+        if (password !== confirm) { showMessage('signupMessage', 'As senhas não conferem', 'error'); return; }
+        btn.disabled = true; btn.textContent = 'Criando conta...';
+        try {
+            const response = await fetch(API_URL + '/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, passwordConfirm: confirm }) });
+            const data = await response.json();
+            if (response.ok) { saveSession(data.user, data.token); showMessage('signupMessage', '✅ Conta criada com sucesso!', 'success'); setTimeout(() => { window.location.href = 'index.html'; }, 800); }
+            else { showMessage('signupMessage', data.message || 'Erro ao criar conta', 'error'); btn.disabled = false; btn.textContent = 'Criar Conta'; }
+        } catch (err) { showMessage('signupMessage', 'Erro de conexão. Backend está rodando?', 'error'); btn.disabled = false; btn.textContent = 'Criar Conta'; }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Projeto - Scrumban Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .notif-btn { position: relative; }
+        .notif-badge {
+            position: absolute; top: -4px; right: -4px;
+            background: #ef4444; color: #fff; border-radius: 50%;
+            width: 18px; height: 18px; font-size: 10px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        .notif-panel {
+            display: none; position: absolute; top: calc(100% + 10px); right: 0;
+            background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 340px; z-index: 1000;
+            overflow: hidden;
+        }
+        .notif-panel.open { display: block; }
+        .notif-panel-header {
+            padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+            font-size: 14px; font-weight: 700; color: #0f172a;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .notif-list { max-height: 320px; overflow-y: auto; }
+        .notif-item {
+            padding: 14px 18px; border-bottom: 1px solid #f8fafc;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .notif-item-sub { font-size: 12px; color: #64748b; }
+        .notif-item-actions { display: flex; gap: 8px; margin-top: 4px; }
+        .btn-notif-accept {
+            padding: 5px 14px; background: #007bff; color: #fff; border: none;
+            border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .btn-notif-accept:hover { opacity: 0.88; }
+        .btn-notif-decline {
+            padding: 5px 14px; background: #f1f5f9; color: #64748b; border: none;
+            border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .btn-notif-decline:hover { background: #fef2f2; color: #dc2626; }
+        .notif-empty { padding: 28px 18px; text-align: center; color: #94a3b8; font-size: 13px; }
+        .notif-wrapper { position: relative; }
+    </style>
+</head>
+<body>
+    <div id="projectApp">
+        <!-- Header -->
+        <header class="app-header" id="appHeader">
+
+            <div class="header-left">
+                <button class="btn-icon logo-btn" id="btnBack" title="Voltar">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="20" y1="12" x2="4" y2="12"></line>
+                        <polyline points="10 18 4 12 10 6"></polyline>
+                    </svg>
+                </button>
+                <h1 class="app-title">Scrumban Manager</h1>
+                <nav class="breadcrumb" id="breadcrumb"></nav>
+            </div>
+            <div class="header-right" id="headerRight">
+                <span id="userDisplay" class="user-display"></span>
+
+                <!-- Sino de convites -->
+                <div class="notif-wrapper" id="notifWrapper">
+                    <button class="btn-icon notif-btn" id="btnNotif" title="Convites">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="notif-badge" id="notifBadge" style="display:none"></span>
+                    </button>
+                    <div class="notif-panel" id="notifPanel">
+                        <div class="notif-panel-header">
+                            <span>📩 Convites de equipe</span>
+                        </div>
+                        <div class="notif-list" id="notifList"></div>
+                    </div>
+                </div>
+
+                <!-- Modo escuro -->
+                <button class="btn-icon" id="btnDarkMode" title="Alternar modo escuro">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+
+                <!-- Sair -->
+                <button class="btn-icon" id="btnLogout" title="Sair">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Hamburger: só visível em mobile -->
+            <button class="btn-hamburger" id="btnHamburger" aria-label="Menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </header>
+
+        <!-- Mobile drawer nav -->
+        <div class="mobile-nav-drawer" id="mobileNavDrawer" role="navigation">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;margin-bottom:4px;">
+                <span id="mobileUserDisplay" style="color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:600;flex:1;"></span>
+            </div>
+            <div class="mobile-nav-divider"></div>
+            <button class="mobile-nav-item" id="mobileBack" onclick="window.location.href='index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="20" y1="12" x2="4" y2="12"></line>
+                    <polyline points="10 18 4 12 10 6"></polyline>
+                </svg>
+                Voltar aos Projetos
+            </button>
+            <button class="mobile-nav-item" id="mobileNotif">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                Convites <span id="mobileNotifCount" style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;display:none"></span>
+            </button>
+            <button class="mobile-nav-item" id="mobileDarkMode">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                Modo Escuro
+            </button>
+            <div class="mobile-nav-divider"></div>
+            <button class="mobile-nav-item" id="mobileLogout" style="color:#fca5a5;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Sair
+            </button>
+        </div>
+        <div id="drawerOverlay" style="display:none;position:fixed;inset:0;z-index:98;" onclick="ProjectApp.closeDrawer()"></div>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Conteúdo do projeto será renderizado aqui -->
+        </main>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <!-- Modal Container -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils/Storage.js"></script>
+    <script src="js/Auth.js"></script>
+    <script src="js/models/Project.js"></script>
+    <script src="js/models/BacklogItem.js"></script>
+    <script src="js/models/Sprint.js"></script>
+    <script src="js/models/Ceremony.js"></script>
+    <script src="js/views/HomeView.js"></script>
+    <script src="js/views/ProjectView.js"></script>
+    <script src="js/views/BacklogView.js"></script>
+    <script src="js/views/SprintView.js"></script>
+    <script src="js/views/KanbanView.js"></script>
+    <script src="js/views/CeremonyView.js"></script>
+    <script>
+        const ProjectApp = {
+            projectId: null,
+            currentUser: null,
+
+            init() {
+                if (!Auth.requireAuth()) return;
+                this.currentUser = Auth.currentUser;
+                this.updateUserDisplay();
+                this.projectId = new URLSearchParams(window.location.search).get('id');
+                if (!this.projectId) { window.location.href = 'index.html'; return; }
+                this.initDarkMode();
+                this.setupEventListeners();
+                this.renderNotifications();
+                this.loadProject();
+            },
+
+            updateUserDisplay() {
+                const el = document.getElementById('userDisplay');
+                if (!el || !this.currentUser) return;
+                const name  = this.currentUser.name || this.currentUser.username || this.currentUser.email || '?';
+                const email = (this.currentUser.email || '').trim().toLowerCase();
+                const initials = name.trim().split(' ').filter(Boolean)
+                    .map((p, i, a) => i === 0 || i === a.length - 1 ? p[0] : null)
+                    .filter(Boolean).join('').toUpperCase().slice(0, 2);
+                el.innerHTML = `
+                    <span class="nav-user-avatar" id="navUserAvatar" title="${name}">
+                        <span class="nav-user-initials">${initials}</span>
+                    </span>
+                    <span class="nav-user-name">${name}</span>`;
+                if (email) {
+                    this._gravatarUrl(email).then(url => {
+                        const avatar = document.getElementById('navUserAvatar');
+                        if (!avatar) return;
+                        const img = new Image();
+                        img.onload = () => {
+                            avatar.innerHTML = '<img src="' + url + '" alt="' + name + '" class="nav-user-photo">';
+                        };
+                        img.src = url;
+                    });
+                }
+            },
+
+            async _gravatarUrl(email) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email));
+                const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+                return `https://gravatar.com/avatar/${hex}?s=80&d=404`;
+            },
+
+            initDarkMode() {
+                const saved = localStorage.getItem('scrumban_dark_mode');
+                const isDark = saved === 'true';
+                if (isDark) document.body.classList.add('dark-mode');
+                this._updateDarkIcons(isDark);
+            },
+
+            toggleDarkMode() {
+                const isDark = document.body.classList.toggle('dark-mode');
+                localStorage.setItem('scrumban_dark_mode', String(isDark));
+                this._updateDarkIcons(isDark);
+            },
+
+            _updateDarkIcons(isDark) {
+                const iconDark  = document.getElementById('iconDark');
+                const iconLight = document.getElementById('iconLight');
+                if (iconDark)  iconDark.style.display  = isDark ? 'none' : '';
+                if (iconLight) iconLight.style.display = isDark ? ''     : 'none';
+                const label = document.getElementById('darkModeLabel');
+                if (label) label.textContent = isDark ? 'Claro' : 'Escuro';
+            },
+
+            setupEventListeners() {
+                document.getElementById('btnBack').addEventListener('click', () => { window.location.href = 'index.html'; });
+                document.getElementById('btnLogout').addEventListener('click', () => {
+                    if (confirm('Tem certeza que deseja sair?')) Auth.logout();
+                });
+                document.getElementById('btnDarkMode')?.addEventListener('click', () => this.toggleDarkMode());
+                document.addEventListener('keydown', e => { if (e.key === 'Escape') { this.closeModal(); this.closeDrawer(); } });
+
+                document.getElementById('btnNotif')?.addEventListener('click', e => {
+                    e.stopPropagation();
+                    document.getElementById('notifPanel').classList.toggle('open');
+                });
+                document.addEventListener('click', () => document.getElementById('notifPanel')?.classList.remove('open'));
+                document.getElementById('notifPanel')?.addEventListener('click', e => e.stopPropagation());
+
+                // Hamburger drawer
+                document.getElementById('btnHamburger')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleDrawer();
+                });
+                document.getElementById('mobileLogout')?.addEventListener('click', () => {
+                    this.closeDrawer();
+                    if (confirm('Tem certeza que deseja sair?')) Auth.logout();
+                });
+                document.getElementById('mobileDarkMode')?.addEventListener('click', () => {
+                    this.toggleDarkMode();
+                });
+                document.getElementById('mobileNotif')?.addEventListener('click', () => {
+                    this.closeDrawer();
+                    document.getElementById('notifPanel')?.classList.toggle('open');
+                });
+            },
+
+            toggleDrawer() {
+                const drawer  = document.getElementById('mobileNavDrawer');
+                const btn     = document.getElementById('btnHamburger');
+                const overlay = document.getElementById('drawerOverlay');
+                const isOpen  = drawer?.classList.toggle('open');
+                btn?.classList.toggle('open', isOpen);
+                if (overlay) overlay.style.display = isOpen ? 'block' : 'none';
+                btn?.setAttribute('aria-expanded', String(isOpen));
+                if (isOpen && this.currentUser) {
+                    const name = this.currentUser.name || this.currentUser.username || '';
+                    const el = document.getElementById('mobileUserDisplay');
+                    if (el) el.textContent = '👤 ' + name;
+                }
+            },
+
+            closeDrawer() {
+                const drawer  = document.getElementById('mobileNavDrawer');
+                const btn     = document.getElementById('btnHamburger');
+                const overlay = document.getElementById('drawerOverlay');
+                drawer?.classList.remove('open');
+                btn?.classList.remove('open');
+                if (overlay) overlay.style.display = 'none';
+                btn?.setAttribute('aria-expanded', 'false');
+            },
+
+            async renderNotifications() {
+                const badge = document.getElementById('notifBadge');
+                const list  = document.getElementById('notifList');
+                if (!badge || !list) return;
+                try {
+                    const invites = await Storage.getMyInvites();
+                    if (!invites || invites.length === 0) {
+                        badge.style.display = 'none';
+                        list.innerHTML = '<div class="notif-empty">Nenhum convite pendente 🎉</div>';
+                        return;
+                    }
+                    badge.style.display = 'flex';
+                    badge.textContent = invites.length;
+                    list.innerHTML = invites.map(inv => `
+                        <div class="notif-item" id="notif-${inv.id}">
+                            <div class="notif-item-title">📋 ${inv.project_name || inv.projectName || ''}</div>
+                            <div class="notif-item-sub">Convidado por <strong>${inv.inviter_name || 'Criador'}</strong></div>
+                            <div class="notif-item-actions">
+                                <button class="btn-notif-accept" onclick="ProjectApp.acceptInvite('${inv.id}', '${inv.project_name || ''}')">Aceitar</button>
+                                <button class="btn-notif-decline" onclick="ProjectApp.declineInvite('${inv.id}')">Recusar</button>
+                            </div>
+                        </div>`).join('');
+                } catch(e) {
+                    badge.style.display = 'none';
+                    list.innerHTML = '<div class="notif-empty">Erro ao carregar convites</div>';
+                }
+            },
+
+            async acceptInvite(inviteId, projectName) {
+                const result = await Storage.acceptInvite(inviteId);
+                document.getElementById(`notif-${inviteId}`)?.remove();
+                await this.renderNotifications();
+                if (result.ok) {
+                    App.toast(`Você entrou no projeto "${projectName}"!`, 'success');
+                    await this.loadProject();
+                } else {
+                    App.toast(result.message || 'Erro ao aceitar convite', 'error');
+                }
+            },
+
+            async declineInvite(inviteId) {
+                const result = await Storage.declineInvite(inviteId);
+                document.getElementById(`notif-${inviteId}`)?.remove();
+                await this.renderNotifications();
+                App.toast(result.ok ? 'Convite recusado' : (result.message || 'Erro'), result.ok ? 'info' : 'error');
+            },
+
+            async loadProject() {
+                const main = document.getElementById('mainContent');
+                main.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:16px;color:#949ba4;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin 1s linear infinite">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        <span>Carregando projeto...</span>
+                    </div>
+                    <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>`;
+
+                try {
+                    const projectData = await Storage.getProject(this.projectId);
+                    if (!projectData) {
+                        alert('Projeto não encontrado ou você não tem acesso a ele.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    main.innerHTML = await ProjectView.render(this.projectId, this.currentUser, projectData);
+                } catch(err) {
+                    console.error('loadProject error:', err);
+                    main.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:12px;color:#ef4444;">
+                            <span style="font-size:2rem">⚠️</span>
+                            <strong>Erro ao carregar o projeto</strong>
+                            <span style="color:#949ba4;font-size:13px">${err.message || 'Verifique se o backend está rodando'}</span>
+                            <button onclick="window.location.href='index.html'" style="margin-top:8px;padding:8px 20px;background:#5865f2;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Voltar</button>
+                        </div>`;
+                }
+            },
+
+            closeModal() {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+        };
+
+        // Stub do App global para compatibilidade com ProjectView
+        const App = {
+            get currentUser() { return ProjectApp.currentUser; },
+            navigateTo(view) { if (view === 'home') window.location.href = 'index.html'; },
+            renderNotifications() { ProjectApp.renderNotifications(); },
+            setBreadcrumb(items) {
+                const breadcrumb = document.getElementById('breadcrumb');
+                if (items.length === 0) {
+                    breadcrumb.innerHTML = '';
+                    return;
+                }
+
+                breadcrumb.innerHTML = items.map((item, idx) => {
+                    if (item.current) {
+                        return `<span class="breadcrumb-current">${HomeView.escapeHtml(item.label)}</span>`;
+                    }
+                    return `
+                        <span class="breadcrumb-item" onclick="${item.action}">${HomeView.escapeHtml(item.label)}</span>
+                        <span class="breadcrumb-separator">›</span>
+                    `;
+                }).join('');
+            },
+            showModal(title, content) {
+                const overlay = document.getElementById('modalOverlay');
+                const modal = document.getElementById('modalContent');
+
+                modal.innerHTML = `
+                    <div class="modal-header">
+                        <h3>${title}</h3>
+                        <button class="btn-icon" onclick="App.closeModal()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    ${content}
+                `;
+
+                overlay.classList.add('active');
+            },
+            closeModal() {
+                document.getElementById('modalOverlay').classList.remove('active');
+            },
+            toast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
+
+                toast.innerHTML = `
+                    <span>${icons[type] || 'ℹ️'}</span>
+                    <span class="toast-message">${message}</span>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateX(100px)';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, 4000);
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            ProjectApp.init();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aceitar Convite - Scrumban Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .invite-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .invite-box {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .invite-header {
+            margin-bottom: 30px;
+        }
+        .invite-header svg {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .invite-header h1 {
+            font-size: 28px;
+            margin: 10px 0;
+            color: #333;
+        }
+        .invite-header p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .invite-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .invite-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .invite-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .invite-message.loading {
+            background-color: #e7f3ff;
+            color: #004085;
+            border: 1px solid #bee5eb;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+        .invite-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="invite-container">
+        <div class="invite-box">
+            <div class="invite-header">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <h1>Convite para Projeto</h1>
+                <p>Você foi convidado para participar de um projeto</p>
+            </div>
+
+            <div id="inviteMessage" class="invite-message loading">
+                <span class="spinner"></span> Processando convite...
+            </div>
+
+            <div id="inviteContent" style="display: none;">
+                <p id="projectName" style="font-size: 16px; font-weight: 600; color: #333; margin: 20px 0;"></p>
+                
+                <div class="invite-actions">
+                    <button id="acceptBtn" class="btn btn-primary" onclick="acceptInvite()">
+                        ✅ Aceitar Convite
+                    </button>
+                    <button id="cancelBtn" class="btn btn-secondary" onclick="goToHome()">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        async function processInvite() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (!token) {
+                showMessage('Convite inválido. Token não encontrado.', 'error');
+                return;
+            }
+
+            try {
+                // Se usuário está logado, aceita automaticamente
+                const userToken = localStorage.getItem('scrumban_token');
+                
+                if (userToken) {
+                    // Usuário já está logado, aceitar automaticamente
+                    const response = await fetch(`${API_URL}/invites/accept/${token}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userToken}`
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage(`✅ Convite aceito! Você foi adicionado ao projeto "${data.project.name}"`, 'success');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        showMessage(data.message || 'Erro ao aceitar convite', 'error');
+                    }
+                } else {
+                    // Usuário não está logado, mostrar opção de aceitar
+                    showMessage('Verifique os detalhes do convite abaixo.', 'loading');
+                    document.getElementById('inviteContent').style.display = 'block';
+                }
+            } catch (error) {
+                showMessage('Erro ao processar convite: ' + error.message, 'error');
+            }
+        }
+
+        async function acceptInvite() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            try {
+                const response = await fetch(`${API_URL}/invites/accept/${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.requiresLogin) {
+                    // Redirecionar para login
+                    window.location.href = `login.html?redirect=accept-invite.html?token=${token}`;
+                } else if (response.ok) {
+                    showMessage(`✅ Convite aceito com sucesso! Você foi adicionado ao projeto.`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'Erro ao aceitar convite', 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao aceitar convite: ' + error.message, 'error');
+            }
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        function showMessage(message, type) {
+            const msgEl = document.getElementById('inviteMessage');
+            msgEl.textContent = message;
+            msgEl.className = `invite-message ${type}`;
+            
+            if (type === 'loading') {
+                msgEl.innerHTML = `<span class="spinner"></span> ${message}`;
+            }
+        }
+
+        // Processar convite ao carregar a página
+        document.addEventListener('DOMContentLoaded', processInvite);
+    </script>
+</body>
+</html>
