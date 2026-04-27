@@ -258,8 +258,6 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/Auth.js"></script>
-<script src="js/utils/Storage.js"></script>
 <script>
     /* ---- Dark Mode ---- */
     function applyDark(isDark) {
@@ -302,8 +300,8 @@
 
     function saveSession(user, token) {
         const safe = { id: user.id || user._id || '', name: user.name || user.username || '', username: user.name || user.username || '', email: user.email || '' };
-        sessionStorage.setItem('scrumban_user', JSON.stringify(safe));
-        sessionStorage.setItem('scrumban_token', token);
+        localStorage.setItem('scrumban_user', JSON.stringify(safe));
+        localStorage.setItem('scrumban_token', token);
     }
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {

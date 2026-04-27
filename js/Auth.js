@@ -1,6 +1,6 @@
 // ========================================
 // AUTH — 100% API (sem localStorage de dados)
-// Só sessionStorage para token/user da sessão
+// Só localStorage para token/user da sessão
 // ========================================
 const Auth = {
     currentUser:  null,
@@ -11,10 +11,10 @@ const Auth = {
         this.checkSession();
     },
 
-    // ---- Sessão (token fica em sessionStorage, não localStorage) ----
+    // ---- Sessão (token fica em localStorage, não localStorage) ----
     checkSession() {
-        const savedUser  = sessionStorage.getItem('scrumban_user');
-        const savedToken = sessionStorage.getItem('scrumban_token');
+        const savedUser  = localStorage.getItem('scrumban_user');
+        const savedToken = localStorage.getItem('scrumban_token');
         if (savedUser && savedToken) {
             try {
                 this.currentUser  = JSON.parse(savedUser);
@@ -29,8 +29,8 @@ const Auth = {
             name:  user.name || user.username || '',
             email: user.email || '',
         };
-        sessionStorage.setItem('scrumban_user',  JSON.stringify(safe));
-        sessionStorage.setItem('scrumban_token', token);
+        localStorage.setItem('scrumban_user',  JSON.stringify(safe));
+        localStorage.setItem('scrumban_token', token);
         this.currentUser  = safe;
         this.currentToken = token;
     },
@@ -109,16 +109,16 @@ const Auth = {
     },
 
     logout() {
-        sessionStorage.removeItem('scrumban_user');
-        sessionStorage.removeItem('scrumban_token');
+        localStorage.removeItem('scrumban_user');
+        localStorage.removeItem('scrumban_token');
         this.currentUser  = null;
         this.currentToken = null;
         window.location.href = 'login.html';
     },
 
     requireAuth() {
-        const savedUser  = sessionStorage.getItem('scrumban_user');
-        const savedToken = sessionStorage.getItem('scrumban_token');
+        const savedUser  = localStorage.getItem('scrumban_user');
+        const savedToken = localStorage.getItem('scrumban_token');
         if (!savedUser || !savedToken) {
             window.location.href = 'login.html';
             return false;
@@ -133,7 +133,7 @@ const Auth = {
         }
     },
 
-    getToken()   { return sessionStorage.getItem('scrumban_token') || ''; },
+    getToken()   { return localStorage.getItem('scrumban_token') || ''; },
     getHeaders() {
         return {
             'Content-Type':  'application/json',
@@ -142,8 +142,7 @@ const Auth = {
     },
 
     setupEventListeners() {
-        document.getElementById('loginForm') ?.addEventListener('submit',  e => { e.preventDefault(); this.login(); });
-        document.getElementById('signupForm')?.addEventListener('submit', e => { e.preventDefault(); this.register(); });
+        // Listeners gerenciados diretamente no login.html para evitar duplicação
     },
 
     _msg(text, type, el) {
