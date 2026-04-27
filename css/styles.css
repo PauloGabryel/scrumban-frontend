@@ -2650,6 +2650,7 @@ body.dark-mode .toast.success { border-color: var(--dm-success); }
 body.dark-mode .toast.error   { border-color: var(--dm-danger); }
 body.dark-mode .toast.warning { border-color: var(--dm-warning); }
 body.dark-mode .toast.info    { border-color: var(--dm-primary); }
+body.dark-mode .toast-message { color: var(--dm-text-strong); }
 body.dark-mode .toast-close { color: var(--dm-muted); }
 body.dark-mode .toast-close:hover { color: var(--dm-text); }
 
