@@ -29,8 +29,7 @@ const App = {
         el.innerHTML = `
             <span class="nav-user-avatar" id="navUserAvatar" title="${name}">
                 <span class="nav-user-initials">${initials}</span>
-            </span>
-            <span class="nav-user-name">${name}</span>`;
+            </span>`;
         if (email) {
             this._gravatarUrl(email).then(url => {
                 const avatar = document.getElementById('navUserAvatar');

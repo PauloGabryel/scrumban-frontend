@@ -1811,7 +1811,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 
 /* ── User display: hide name, show only avatar on mobile ── */
 .nav-user-name { display: none; }
-.user-display  { margin-right: 4px; padding: var(--space-xs) var(--space-sm); }
+.user-display  { margin-right: var(--space-sm); padding: var(--space-xs) var(--space-sm); }
 
 /* ── Header-right: tighter gap ── */
 .header-right { gap: var(--space-sm); }
@@ -1931,13 +1931,16 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 
 /* ── Show hamburger on small screens ── */
 @media (max-width: 767px) {
-    .btn-hamburger { display: flex; }
-    /* Hide desktop nav items that move to drawer */
-    .header-right .user-display,
+    .btn-hamburger { display: flex; flex-shrink: 0; }
+    /* Esconde sino, logout e dark mode — ficam no drawer */
     #btnLogout,
-    #btnDarkMode {
+    #btnDarkMode,
+    #notifWrapper {
         display: none !important;
     }
+    /* Avatar visível, nome escondido */
+    .header-right .user-display { display: inline-flex !important; margin-right: 4px; }
+    .nav-user-name { display: none !important; }
 }
 
 /* ========================================
@@ -2206,6 +2209,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     margin-right: var(--space-md);
     border: 1px solid rgba(255,255,255,0.15);
 }
+
 
 .nav-user-avatar {
     display: inline-flex;
