@@ -277,7 +277,8 @@ const CeremonyView = {
                 const manualInput = document.getElementById('dailyParticipant');
                 name = manualInput ? manualInput.value.trim() : '';
                 if (!name) {
-                    name = 'Participante';
+                    App.toast('Informe o nome do participante', 'warning');
+                    return;
                 }
             }
             entries.push({
