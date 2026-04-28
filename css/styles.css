@@ -1827,8 +1827,8 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 .project-header { flex-direction: column; }
 .project-title-section h2 { font-size: 1.35rem; }
 
-/* ── User display: hide name, show only avatar on mobile ── */
-.nav-user-name { display: none; }
+/* ── User display: nome NUNCA aparece, só avatar ── */
+.nav-user-name { display: none !important; }
 .user-display  { margin-right: var(--space-sm); padding: var(--space-xs) var(--space-sm); }
 
 /* ── Header-right: tighter gap ── */
@@ -1878,7 +1878,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     #darkModeLabel       { display: inline; }
     #btnDarkMode         { padding: 6px 12px !important; }
     .btn-icon            { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
-    .nav-user-name       { display: inline; }
+    .nav-user-name       { display: none !important; }
 
     .main-content   { padding: var(--space-xl); }
     .home-hero      { padding: var(--space-2xl) 0 var(--space-xl); }
@@ -2564,7 +2564,6 @@ body.dark-mode .tab-btn {
     background: transparent;
     border-radius: 8px;
     border-bottom: none;
-    padding: 8px 16px;
 }
 body.dark-mode .tab-btn:hover {
     color: var(--dm-text);
@@ -3022,7 +3021,6 @@ body.dark-mode .tab-btn {
     color: var(--dm-muted) !important;
     border-bottom: none !important;
     border-radius: 8px !important;
-    padding: 8px 16px !important;
 }
 body.dark-mode .tab-btn:hover {
     color: var(--dm-text) !important;
