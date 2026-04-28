@@ -100,18 +100,7 @@ const HomeView = {
             `;
         });
 
-        if (projects.length === 0) {
-            projectCards = `
-                <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:50px 20px;">
-                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin:0 auto 16px;display:block;">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                    <h4 style="color:#475569;margin-bottom:8px;">Nenhum projeto ainda</h4>
-                    <p style="color:#94a3b8;max-width:320px;margin:0 auto;">Clique em <strong>Criar Novo Projeto</strong> para começar, ou aguarde um convite de outro usuário.</p>
-                </div>`;
-        }
+        // empty-state removido: quando não há projetos, apenas o card "Criar Novo Projeto" é exibido
 
         return `
             <div class="home-hero">
