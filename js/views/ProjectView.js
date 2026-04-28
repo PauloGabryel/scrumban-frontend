@@ -178,6 +178,7 @@ const ProjectView = {
         let memberRows = '';
         members.forEach((m, i) => {
             const isCreatorRow = i === 0;
+            const isMe = this.currentUser && (this.currentUser.id || this.currentUser._id) === m.userId;
             memberRows += `
                 <div class="member-item">
                     ${this._avatarHtml(m.userId, m.name, isCreatorRow ? 'creator' : '')}
@@ -190,6 +191,10 @@ const ProjectView = {
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
                                 <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
+                        </button>` : ''}
+                    ${!isAdmin && !isCreatorRow && isMe ? `
+                        <button class="m-remove" onclick="ProjectView.leaveProject()" title="Sair do projeto" style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;border:1px solid #ef4444;color:#ef4444;background:none;cursor:pointer;font-size:12px;font-weight:600;">
+                            Sair
                         </button>` : ''}
                 </div>`;
         });
@@ -492,6 +497,20 @@ const ProjectView = {
                 App.toast(result.message || 'Erro ao remover membro', 'error');
             }
             this.refreshTab();
+        });
+    },
+
+    leaveProject() {
+        if (!confirm('Tem certeza que deseja sair deste projeto?')) return;
+        const p = this.currentProject;
+        const userId = this.currentUser.id || this.currentUser._id;
+        Storage.removeMember(p.id, userId).then(result => {
+            if (result.ok) {
+                App.toast('Você saiu do projeto', 'info');
+                window.location.href = 'index.html';
+            } else {
+                App.toast(result.message || 'Erro ao sair do projeto', 'error');
+            }
         });
     },
 
