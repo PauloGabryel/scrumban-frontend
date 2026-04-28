@@ -340,10 +340,6 @@ body {
 .home-hero {
     text-align: center;
     padding: var(--space-2xl) 0 var(--space-xl);
-    background: #eef1f6;
-    border: 1px solid #d1d9e6;
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-lg);
 }
 
 .home-hero h2 {
@@ -1464,7 +1460,7 @@ body {
 
 .form-textarea {
     min-height: 80px;
-    resize: vertical;
+    resize: none;
 }
 
 .form-row {
@@ -1517,7 +1513,9 @@ body.dark-mode .section-divider {
     width: 100%;
     max-width: 580px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 24px 64px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.08);
     animation: modalIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid var(--gray-200);
@@ -1531,6 +1529,9 @@ body.dark-mode .section-divider {
     border-bottom: 1px solid var(--gray-100);
     background: linear-gradient(135deg, #0c1220 0%, #132040 100%);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .modal-header h3 {
@@ -1550,6 +1551,8 @@ body.dark-mode .section-divider {
 
 .modal-body {
     padding: var(--space-xl);
+    overflow-y: auto;
+    flex: 1;
 }
 
 .modal-footer {
@@ -1560,6 +1563,7 @@ body.dark-mode .section-divider {
     gap: var(--space-sm);
     background: var(--gray-50);
     border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    flex-shrink: 0;
 }
 
 /* ========================================
@@ -1759,6 +1763,9 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     width: 100%;
     max-height: 92vh;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ── Main content mobile padding ── */
@@ -1814,7 +1821,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 .project-title-section h2 { font-size: 1.35rem; }
 
 /* ── User display: hide name, show only avatar on mobile ── */
-.nav-user-name { display: none !important; }
+.nav-user-name { display: none; }
 .user-display  { margin-right: var(--space-sm); padding: var(--space-xs) var(--space-sm); }
 
 /* ── Header-right: tighter gap ── */
@@ -1864,7 +1871,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     #darkModeLabel       { display: inline; }
     #btnDarkMode         { padding: 6px 12px !important; }
     .btn-icon            { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
-    .nav-user-name       { display: none !important; }
+    .nav-user-name       { display: inline; }
 
     .main-content   { padding: var(--space-xl); }
     .home-hero      { padding: var(--space-2xl) 0 var(--space-xl); }
@@ -1935,16 +1942,13 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 
 /* ── Show hamburger on small screens ── */
 @media (max-width: 767px) {
-    .btn-hamburger { display: flex; flex-shrink: 0; }
-    /* Esconde sino, logout e dark mode — ficam no drawer */
+    .btn-hamburger { display: flex; }
+    /* Hide desktop nav items that move to drawer */
+    .header-right .user-display,
     #btnLogout,
-    #btnDarkMode,
-    #notifWrapper {
+    #btnDarkMode {
         display: none !important;
     }
-    /* Avatar visível, nome escondido */
-    .header-right .user-display { display: inline-flex !important; margin-right: 4px; }
-    .nav-user-name { display: none !important; }
 }
 
 /* ========================================
@@ -2203,49 +2207,15 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 .user-display {
     display: inline-flex;
     align-items: center;
-    background: none;
-    border: none;
-    padding: 0;
-    margin-right: var(--space-sm);
-}
-
-
-.nav-user-avatar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.25);
-    border: 2px solid rgba(255,255,255,0.4);
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
-.nav-user-initials {
-    font-size: 0.75rem;
-    font-weight: 700;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255,255,255,0.12);
     color: #fff;
-    line-height: 1;
-    letter-spacing: 0.03em;
-}
-
-.nav-user-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.nav-user-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-right: var(--space-md);
+    border: 1px solid rgba(255,255,255,0.15);
 }
 
 /* Project Detail Styles */
