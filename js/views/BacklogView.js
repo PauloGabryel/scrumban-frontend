@@ -215,9 +215,28 @@ const BacklogView = {
     },
 
     deleteItem(itemId) {
+        App.showModal('Confirmar Exclusão', `
+            <div class="modal-body">
+                <p style="text-align:center;padding:16px 0;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5" style="display:block;margin:0 auto 12px;">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
+                    Tem certeza que deseja excluir este item do backlog?<br>
+                    <small style="color:var(--gray-500)">Esta ação não pode ser desfeita.</small>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="App.closeModal()">Cancelar</button>
+                <button class="btn btn-danger" onclick="BacklogView._confirmDelete('${itemId}')">Excluir</button>
+            </div>
+        `);
+    },
+
+    _confirmDelete(itemId) {
         const p = ProjectView.currentProject;
         p.removeBacklogItem(itemId);
-        p.save(); // Persistir remoção do backlog
+        p.save();
+        App.closeModal();
         App.toast('Item removido do backlog', 'info');
         ProjectView.refreshProject();
         ProjectView.refreshTab();

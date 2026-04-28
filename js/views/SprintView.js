@@ -207,11 +207,11 @@ const SprintView = {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Data de Início</label>
-                        <input type="date" class="form-input" id="sprintStart" value="${today}">
+                        <input type="date" class="form-input" id="sprintStart" value="${today}" min="${today}">
                     </div>
                     <div class="form-group">
                         <label>Data de Término</label>
-                        <input type="date" class="form-input" id="sprintEnd" value="${twoWeeks}">
+                        <input type="date" class="form-input" id="sprintEnd" value="${twoWeeks}" min="${today}">
                     </div>
                 </div>
                 <p class="text-xs text-muted">💡 Sprints devem ter duração de 2 a 4 semanas.</p>
@@ -235,6 +235,17 @@ const SprintView = {
 
         if (!startDate || !endDate) {
             App.toast('Data de início e término são obrigatórias', 'warning');
+            return;
+        }
+
+        // Block past dates
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (startDate < todayStr) {
+            App.toast('A data de início não pode ser no passado', 'warning');
+            return;
+        }
+        if (endDate < todayStr) {
+            App.toast('A data de término não pode ser no passado', 'warning');
             return;
         }
 

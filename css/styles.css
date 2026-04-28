@@ -1959,6 +1959,22 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     /* Avatar visível e colado ao hamburger */
     .header-right { display: flex !important; gap: 6px !important; }
     .header-right .user-display { display: inline-flex !important; margin-right: 0 !important; }
+
+    /* FIX 7/9: Toast visível no mobile — z-index alto e posição ajustada */
+    .toast-container {
+        position: fixed !important;
+        bottom: var(--space-md) !important;
+        left: var(--space-sm) !important;
+        right: var(--space-sm) !important;
+        z-index: 9999 !important;
+        width: auto !important;
+    }
+    .toast {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        font-size: 0.82rem;
+    }
 }
 
 /* ========================================
@@ -3428,6 +3444,13 @@ body.dark-mode .toast {
     border: 1px solid var(--dm-border-strong) !important;
     color: var(--dm-text) !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.45) !important;
+}
+/* FIX 1: Dark mode — toast message text must be white */
+body.dark-mode .toast-message {
+    color: var(--dm-text) !important;
+}
+body.dark-mode .toast span:first-child {
+    color: var(--dm-text) !important;
 }
 
 /* Dark mode — scrollbar refinada */
