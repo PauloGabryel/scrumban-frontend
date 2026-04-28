@@ -254,32 +254,38 @@ const CeremonyView = {
             return;
         }
 
-        const entries = [];
-        const yesterdays   = document.querySelectorAll('.daily-yesterday');
-        const todays       = document.querySelectorAll('.daily-today');
-        const impediments  = document.querySelectorAll('.daily-impediments');
+        const yesterdays  = document.querySelectorAll('.daily-yesterday');
+        const todays      = document.querySelectorAll('.daily-today');
+        const impediments = document.querySelectorAll('.daily-impediments');
 
-        // Validar que pelo menos um participante tem "ontem" ou "hoje" preenchido
+        // Validar nome do participante manual (quando não há devs no projeto)
+        const manualInput = document.getElementById('dailyParticipant');
+        if (manualInput) {
+            const nome = manualInput.value.trim();
+            if (!nome) {
+                App.toast('Informe o nome do participante', 'warning');
+                return;
+            }
+        }
+
+        // Validar que pelo menos um campo "ontem" ou "hoje" foi preenchido
         let algumPreenchido = false;
         yesterdays.forEach((input, idx) => {
-            const y = input.value.trim();
-            const t = todays[idx] ? todays[idx].value.trim() : '';
-            if (y || t) algumPreenchido = true;
+            if (input.value.trim() || (todays[idx] && todays[idx].value.trim())) {
+                algumPreenchido = true;
+            }
         });
         if (!algumPreenchido) {
-            App.toast('Preencha pelo menos "O que fez ontem" ou "O que vai fazer hoje" para um participante', 'warning');
+            App.toast('Preencha pelo menos "O que fez ontem" ou "O que vai fazer hoje"', 'warning');
             return;
         }
 
+        // Montar entries
+        const entries = [];
         yesterdays.forEach((input, idx) => {
             let name = input.dataset.name;
             if (name === 'manual') {
-                const manualInput = document.getElementById('dailyParticipant');
-                name = manualInput ? manualInput.value.trim() : '';
-                if (!name) {
-                    App.toast('Informe o nome do participante', 'warning');
-                    return;
-                }
+                name = manualInput ? manualInput.value.trim() : 'Participante';
             }
             entries.push({
                 name,
