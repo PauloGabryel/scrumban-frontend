@@ -1953,7 +1953,8 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     /* Hide desktop nav items that move to drawer */
     .header-right .user-display,
     #btnLogout,
-    #btnDarkMode {
+    #btnDarkMode,
+    #notifWrapper {
         display: none !important;
     }
 }
