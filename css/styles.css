@@ -1951,11 +1951,20 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 @media (max-width: 767px) {
     .btn-hamburger { display: flex; }
     /* Hide desktop nav items that move to drawer */
-    .header-right .user-display,
     #btnLogout,
     #btnDarkMode,
     #notifWrapper {
         display: none !important;
+    }
+    /* Mantém o nome visível no header mobile */
+    .header-right { display: flex !important; }
+    .header-right .user-display {
+        display: inline-flex !important;
+        font-size: 0.8rem;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
