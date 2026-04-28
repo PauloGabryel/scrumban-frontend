@@ -1811,7 +1811,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 
 /* ── User display: hide name, show only avatar on mobile ── */
 .nav-user-name { display: none; }
-.user-display  { margin-right: var(--space-sm); padding: var(--space-xs) var(--space-sm); }
+.user-display  { margin-right: 4px; padding: var(--space-xs) var(--space-sm); }
 
 /* ── Header-right: tighter gap ── */
 .header-right { gap: var(--space-sm); }
@@ -1931,16 +1931,13 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 
 /* ── Show hamburger on small screens ── */
 @media (max-width: 767px) {
-    .btn-hamburger { display: flex; flex-shrink: 0; }
+    .btn-hamburger { display: flex; }
     /* Hide desktop nav items that move to drawer */
+    .header-right .user-display,
     #btnLogout,
-    #btnDarkMode,
-    #notifWrapper {
+    #btnDarkMode {
         display: none !important;
     }
-    /* Mostrar apenas o avatar (sem nome) no mobile */
-    .header-right .user-display { display: flex !important; }
-    .nav-user-name { display: none !important; }
 }
 
 /* ========================================
@@ -2208,6 +2205,44 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     font-size: 0.9rem;
     margin-right: var(--space-md);
     border: 1px solid rgba(255,255,255,0.15);
+}
+
+.nav-user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.4);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.nav-user-initials {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: 0.03em;
+}
+
+.nav-user-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.nav-user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
 }
 
 /* Project Detail Styles */
