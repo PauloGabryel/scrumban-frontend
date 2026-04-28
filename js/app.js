@@ -66,7 +66,7 @@ const App = {
         document.getElementById('btnHamburger')?.addEventListener('click', e => { e.stopPropagation(); this.toggleDrawer(); });
         document.getElementById('mobileLogout')?.addEventListener('click', () => { this.closeDrawer(); if (confirm('Tem certeza?')) Auth.logout(); });
         document.getElementById('mobileDarkMode')?.addEventListener('click', () => this.toggleDarkMode());
-        document.getElementById('mobileNotif')?.addEventListener('click', () => { this.closeDrawer(); document.getElementById('notifPanel')?.classList.toggle('open'); });
+        document.getElementById('mobileNotif')?.addEventListener('click', () => { this.closeDrawer(); this.openMobileInvitesModal(); });
     },
 
     toggleDrawer() {
@@ -146,6 +146,29 @@ const App = {
         document.getElementById(`notif-${inviteId}`)?.remove();
         await this.renderNotifications();
         this.toast(result.ok ? 'Convite recusado' : result.message, result.ok ? 'info' : 'error');
+    },
+
+    async openMobileInvitesModal() {
+        let invites = [];
+        try { invites = await Storage.getMyInvites(); } catch(e) {}
+
+        const items = invites.length
+            ? invites.map(inv => `
+                <div class="notif-item" id="mob-inv-${inv.id}" style="border-bottom:1px solid var(--gray-200);padding:14px 0;">
+                    <div class="notif-item-title">📋 ${this._esc(inv.project_name || inv.projectName || '')}</div>
+                    <div class="notif-item-sub">Convidado por <strong>${this._esc(inv.invited_by_name || inv.creatorName || '')}</strong></div>
+                    <div class="notif-item-actions" style="margin-top:8px;">
+                        <button class="btn-notif-accept" onclick="App.acceptInvite('${inv.id}','${this._esc(inv.project_name || '')}');App.closeModal();">Aceitar</button>
+                        <button class="btn-notif-decline" onclick="App.declineInvite('${inv.id}');document.getElementById('mob-inv-${inv.id}')?.remove();">Recusar</button>
+                    </div>
+                </div>`).join('')
+            : '<p style="text-align:center;color:var(--gray-400);padding:24px 0;">Nenhum convite pendente 🎉</p>';
+
+        this.showModal('📩 Convites de equipe', `
+            <div class="modal-body">${items}</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="App.closeModal()">Fechar</button>
+            </div>`);
     },
 
     _esc(str) {
