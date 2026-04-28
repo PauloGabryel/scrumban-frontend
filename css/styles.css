@@ -340,6 +340,10 @@ body {
 .home-hero {
     text-align: center;
     padding: var(--space-2xl) 0 var(--space-xl);
+    background: #dde3ee;
+    border: 1px solid #c2cad9;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
 }
 
 .home-hero h2 {
@@ -908,6 +912,9 @@ body {
     text-align: center;
     padding: var(--space-2xl);
     color: var(--gray-400);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .empty-state svg {
