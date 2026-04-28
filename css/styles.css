@@ -340,6 +340,10 @@ body {
 .home-hero {
     text-align: center;
     padding: var(--space-2xl) 0 var(--space-xl);
+    background: #eef1f6;
+    border: 1px solid #d1d9e6;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
 }
 
 .home-hero h2 {
