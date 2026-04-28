@@ -17,6 +17,9 @@ function makeToken(user) {
 }
 
 // ─── Registro ────────────────────────────────────────────────────────────────
+// Cria a conta e envia email de verificação.
+// O usuário só consegue logar após confirmar o email.
+// Se o email não estiver configurado (modo dev), ativa direto.
 
 exports.register = async (req, res) => {
   try {
@@ -89,6 +92,7 @@ exports.register = async (req, res) => {
 };
 
 // ─── Verificar Email ─────────────────────────────────────────────────────────
+// Chamado quando o usuário clica no link do email de confirmação.
 
 exports.verifyEmail = async (req, res) => {
   try {
@@ -151,6 +155,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Email ou senha incorretos' });
     }
 
+    // email_verified === false (estritamente): bloqueia
+    // null ou true: deixa passar (retrocompatibilidade com contas antigas)
     if (user.email_verified === false) {
       return res.status(403).json({
         message: 'Confirme seu email antes de fazer login. Verifique sua caixa de entrada.',
@@ -193,7 +199,6 @@ exports.verifyToken = async (req, res) => {
 };
 
 // ─── Esqueci a Senha ─────────────────────────────────────────────────────────
-// ALTERADO: agora informa claramente se o email não está cadastrado.
 
 exports.forgotPassword = async (req, res) => {
   try {
@@ -203,18 +208,17 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ message: 'Por favor, informe seu email' });
     }
 
+    // Mensagem genérica — não revela se o email existe ou não
+    const successMsg = 'Se este email estiver cadastrado, você receberá as instruções em breve.';
+
     const { data: user } = await supabase
       .from('users')
       .select('id, name, email')
       .eq('email', email.toLowerCase())
       .single();
 
-    // ← MUDANÇA: resposta diferente quando email não existe
     if (!user) {
-      return res.status(404).json({
-        message: 'Este email não está cadastrado. Verifique o endereço ou crie uma conta.',
-        notFound: true,
-      });
+      return res.json({ message: successMsg });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -234,19 +238,10 @@ exports.forgotPassword = async (req, res) => {
 
     if (error) throw error;
 
-    const emailSent = await sendPasswordResetEmail(user.email, resetToken, user.name);
+    // Envia o email — mesmo se falhar, responde sucesso (não vaza info)
+    await sendPasswordResetEmail(user.email, resetToken, user.name);
 
-    if (!emailSent) {
-      // Email não configurado no servidor — informa o admin no log
-      console.error('[forgotPassword] Email não enviado: variáveis EMAIL_USER/EMAIL_PASSWORD não configuradas no servidor.');
-      return res.status(500).json({
-        message: 'Erro ao enviar email. O serviço de email não está configurado. Entre em contato com o suporte.',
-      });
-    }
-
-    return res.json({
-      message: 'Email enviado! Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.',
-    });
+    return res.json({ message: successMsg });
 
   } catch (error) {
     console.error('[forgotPassword]', error);
