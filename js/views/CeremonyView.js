@@ -500,10 +500,11 @@ const CeremonyView = {
     _isValidDate(str) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
         const [y, m, d] = str.split('-').map(Number);
-        const dt = new Date(str);
-        return !isNaN(dt.getTime()) &&
-               dt.getFullYear() === y &&
-               dt.getMonth() + 1 === m &&
-               dt.getDate() === d;
+        if (y < 2000 || y > 2099) return false;
+        if (m < 1 || m > 12) return false;
+        if (d < 1 || d > 31) return false;
+        // Verifica dias válidos pro mês (new Date(y, m, 0) retorna último dia do mês m — sem fuso)
+        const ultimoDia = new Date(y, m, 0).getDate();
+        return d <= ultimoDia;
     }
 };

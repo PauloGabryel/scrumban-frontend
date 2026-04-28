@@ -245,47 +245,49 @@ const SprintView = {
             return;
         }
 
-        const start = new Date(startDate);
-        const end   = new Date(endDate);
-
-        // Checar se as datas são válidas de verdade (ex: 22/22 vira Invalid Date)
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            App.toast('Data inválida. Verifique o dia e mês informados', 'warning');
-            return;
-        }
-
-        // Garantir que o mês e dia não extrapolaram (ex: 2024-02-30 JS converte, mas não deve)
+        // Checar se dia e mês são possíveis sem depender de fuso horário
         const [sy, sm, sd] = startDate.split('-').map(Number);
         const [ey, em, ed] = endDate.split('-').map(Number);
-        if (start.getFullYear() !== sy || start.getMonth()+1 !== sm || start.getDate() !== sd) {
-            App.toast('Data de início inválida (dia ou mês fora do intervalo)', 'warning');
+
+        if (sm < 1 || sm > 12 || sd < 1 || sd > 31 || sy < 2000 || sy > 2099) {
+            App.toast('Data de início inválida', 'warning');
             return;
         }
-        if (end.getFullYear() !== ey || end.getMonth()+1 !== em || end.getDate() !== ed) {
-            App.toast('Data de término inválida (dia ou mês fora do intervalo)', 'warning');
+        if (em < 1 || em > 12 || ed < 1 || ed > 31 || ey < 2000 || ey > 2099) {
+            App.toast('Data de término inválida', 'warning');
             return;
         }
 
-        // Bloquear datas passadas
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (start < today) {
+        // Verificar dias válidos para o mês (ex: 30 de fevereiro)
+        const diasNoMes = (y, m) => new Date(y, m, 0).getDate();
+        if (sd > diasNoMes(sy, sm)) {
+            App.toast(`Data de início inválida: ${sm}/${sy} não tem dia ${sd}`, 'warning');
+            return;
+        }
+        if (ed > diasNoMes(ey, em)) {
+            App.toast(`Data de término inválida: ${em}/${ey} não tem dia ${ed}`, 'warning');
+            return;
+        }
+
+        // Bloquear datas passadas (comparação de string YYYY-MM-DD é segura)
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (startDate < todayStr) {
             App.toast('A data de início não pode ser no passado', 'warning');
             return;
         }
-        if (end < today) {
+        if (endDate < todayStr) {
             App.toast('A data de término não pode ser no passado', 'warning');
             return;
         }
 
         // Fim deve ser depois do início
-        if (end <= start) {
+        if (endDate <= startDate) {
             App.toast('A data de término deve ser depois da data de início', 'warning');
             return;
         }
 
-        // Validar 2 a 4 semanas
-        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+        // Validar 2 a 4 semanas (new Date(y, m-1, d) usa hora local — sem problema de fuso)
+        const diffDays = (new Date(ey, em-1, ed) - new Date(sy, sm-1, sd)) / (1000 * 60 * 60 * 24);
         if (diffDays < 14 || diffDays > 28) {
             App.toast('A sprint deve ter entre 2 e 4 semanas (14–28 dias)', 'warning');
             return;
