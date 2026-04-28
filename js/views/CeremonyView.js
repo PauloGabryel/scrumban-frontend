@@ -223,7 +223,7 @@ const CeremonyView = {
             <div class="modal-body">
                 <div class="form-group">
                     <label>Data *</label>
-                    <input type="date" class="form-input" id="dailyDate" value="${today}" min="2000-01-01" max="${today}" oninput="CeremonyView._clampDate(this,'${today}')">
+                    <input type="date" class="form-input" id="dailyDate" value="${today}" min="2000-01-01" max="${today}">
                 </div>
                 <hr class="section-divider" style="margin:var(--space-md) 0;">
                 ${participantsHtml}
@@ -329,7 +329,7 @@ const CeremonyView = {
                     </div>
                     <div class="form-group">
                         <label>Data *</label>
-                        <input type="date" class="form-input" id="retroDate" value="${today}" min="2000-01-01" max="${today}" oninput="CeremonyView._clampDate(this,'${today}')">
+                        <input type="date" class="form-input" id="retroDate" value="${today}" min="2000-01-01" max="${today}">
                     </div>
                 </div>
 

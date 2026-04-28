@@ -207,11 +207,11 @@ const SprintView = {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Data de Início</label>
-                        <input type="date" class="form-input" id="sprintStart" value="${today}" min="${today}" max="2099-12-31" oninput="SprintView._clampDate(this,'${today}')">
+                        <input type="date" class="form-input" id="sprintStart" value="${today}" min="${today}" max="2099-12-31">
                     </div>
                     <div class="form-group">
                         <label>Data de Término</label>
-                        <input type="date" class="form-input" id="sprintEnd" value="${twoWeeks}" min="${today}" max="2099-12-31" oninput="SprintView._clampDate(this,'${today}')">
+                        <input type="date" class="form-input" id="sprintEnd" value="${twoWeeks}" min="${today}" max="2099-12-31">
                     </div>
                 </div>
                 <p class="text-xs text-muted">💡 Sprints devem ter duração de 2 a 4 semanas.</p>
