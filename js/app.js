@@ -268,10 +268,22 @@ const App = {
     },
 
     _updateDarkIcons(isDark) {
+        // Ícones do botão desktop
         document.getElementById('iconDark') ?.setAttribute('style', isDark ? 'display:none' : '');
         document.getElementById('iconLight')?.setAttribute('style', isDark ? '' : 'display:none');
+        // Ícone do botão mobile: troca o path interno do SVG
+        const mobileIcon = document.getElementById('mobileDarkModeIcon');
+        if (mobileIcon) {
+            mobileIcon.innerHTML = isDark
+                // Sol (modo escuro ativo → clicar vai para claro)
+                ? '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>'
+                // Lua (modo claro ativo → clicar vai para escuro)
+                : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+        }
+        // Label mobile ("Modo Claro" / "Modo Escuro")
         const label = document.getElementById('darkModeLabel');
-        if (label) label.textContent = isDark ? 'Claro' : 'Escuro';
+        if (label) label.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+        // Tooltip desktop
         const btn = document.getElementById('btnDarkMode');
         if (btn) btn.title = isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro';
     },
