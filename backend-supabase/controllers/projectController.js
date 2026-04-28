@@ -134,3 +134,22 @@ exports.deleteProject = async (req, res) => {
     res.status(500).json({ message: 'Erro ao deletar projeto: ' + e.message });
   }
 };
+
+// Remover membro do projeto
+exports.removeMember = async (req, res) => {
+  try {
+    const { id: projectId, userId } = req.params;
+
+    const { data: proj } = await supabase.from('projects').select('creator_id').eq('id', projectId).single();
+    if (!proj) return res.status(404).json({ message: 'Projeto não encontrado' });
+    if (proj.creator_id !== req.user.id) return res.status(403).json({ message: 'Apenas o criador pode remover membros' });
+    if (userId === proj.creator_id) return res.status(400).json({ message: 'Não é possível remover o criador do projeto' });
+
+    const { error } = await supabase.from('project_members').delete().eq('project_id', projectId).eq('user_id', userId);
+    if (error) throw error;
+
+    res.json({ message: 'Membro removido com sucesso' });
+  } catch (e) {
+    res.status(500).json({ message: 'Erro ao remover membro: ' + e.message });
+  }
+};

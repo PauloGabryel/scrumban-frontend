@@ -195,20 +195,24 @@ const ProjectView = {
         });
 
         // Pendentes
-        (p.pendingInvites || []).forEach(email => {
+        (p.pendingInvites || []).forEach(inv => {
+            const invEmail  = typeof inv === 'string' ? inv : inv.email;
+            const invId     = typeof inv === 'string' ? null : inv.id;
+            const cancelBtn = isAdmin && invId
+                ? `<button class="m-remove" onclick="ProjectView.cancelInvite('${invId}','${this._esc(invEmail)}')" title="Cancelar convite">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                   </button>`
+                : '';
             memberRows += `
                 <div class="member-item">
                     <div class="m-avatar pending">?</div>
                     <div class="m-info">
-                        <span class="m-name" style="color:#64748b">${this._esc(email)}</span>
+                        <span class="m-name" style="color:#64748b">${this._esc(invEmail)}</span>
                         <span class="m-badge badge-pending">⏳ Pendente</span>
                     </div>
-                    ${isAdmin ? `
-                        <button class="m-remove" onclick="ProjectView.cancelInvite('${email}')" title="Cancelar convite">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>` : ''}
+                    ${cancelBtn}
                 </div>`;
         });
 
@@ -464,23 +468,29 @@ const ProjectView = {
         }
     },
 
-    cancelInvite(email) {
+    cancelInvite(inviteId, email) {
         if (!confirm(`Cancelar convite para ${email}?`)) return;
-        const p = this.currentProject;
-        p.pendingInvites = (p.pendingInvites || []).filter(e => e !== email);
-        p.save();
-        App.toast('Convite cancelado', 'info');
-        this.refreshTab();
+        Storage.cancelInvite(inviteId).then(result => {
+            if (result.ok) {
+                App.toast('Convite cancelado', 'info');
+            } else {
+                App.toast(result.message || 'Erro ao cancelar convite', 'error');
+            }
+            this.refreshTab();
+        });
     },
 
     removeMember(userId) {
         if (!confirm('Remover este membro do projeto?')) return;
         const p = this.currentProject;
-        p.members = (p.members || []).filter(id => id !== userId);
-        if (p.memberNames) delete p.memberNames[userId];
-        p.save();
-        App.toast('Membro removido', 'info');
-        this.refreshTab();
+        Storage.removeMember(p.id, userId).then(result => {
+            if (result.ok) {
+                App.toast('Membro removido', 'info');
+            } else {
+                App.toast(result.message || 'Erro ao remover membro', 'error');
+            }
+            this.refreshTab();
+        });
     },
 
     // -----------------------------------------------

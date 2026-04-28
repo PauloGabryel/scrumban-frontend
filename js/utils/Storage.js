@@ -195,9 +195,47 @@ const Storage = {
         }
     },
 
+    async removeMember(projectId, userId) {
+        try {
+            const res = await this._fetch(`/projects/${projectId}/members/${userId}`, { method: 'DELETE' });
+            if (!res) return { ok: false, message: 'Sem resposta do servidor.' };
+            const data = await res.json();
+            return { ok: res.ok, message: data.message };
+        } catch(e) {
+            return { ok: false, message: 'Erro de conexão' };
+        }
+    },
+
     // ---- Normaliza projeto do backend para o formato do frontend ----
     _normalizeProject(p) {
         const extra = p.data || {};
+
+        // Membros reais do banco (project_members JOIN users)
+        // Sempre prioriza esses dados sobre o JSONB legado (extra.members)
+        const backendMembers = (p.project_members || []).map(m => ({
+            userId: m.users?.id,
+            name:   m.users?.name,
+            email:  m.users?.email,
+            role:   m.role,
+        })).filter(m => m.userId); // remove entradas sem userId
+
+        // Se o banco retornou membros, usa eles; caso contrário cai no JSONB legado
+        let members, memberNames;
+        if (backendMembers.length > 0) {
+            const creatorId = p.creator_id || extra.creatorId || '';
+            // members = todos exceto o criador (que já aparece separadamente via creatorId)
+            members     = backendMembers.filter(m => m.userId !== creatorId).map(m => m.userId);
+            memberNames = {};
+            backendMembers.forEach(m => { if (m.userId) memberNames[m.userId] = m.name || m.email || m.userId; });
+        } else {
+            members     = extra.members     || [];
+            memberNames = extra.memberNames || {};
+        }
+
+        // pendingInvites: mantém objetos completos {id, email} para poder cancelar via API
+        const rawPending     = p.pendingInvites || extra.pendingInvites || [];
+        const pendingInvites = rawPending.map(inv => (typeof inv === 'string' ? { id: null, email: inv } : { id: inv.id || null, email: inv.email })).filter(inv => inv.email);
+
         return {
             id:             p.id,
             name:           p.name        || extra.name        || '',
@@ -207,9 +245,9 @@ const Storage = {
             creatorId:      p.creator_id  || extra.creatorId   || '',
             creatorName:    p.creator?.name  || extra.creatorName  || '',
             creatorEmail:   p.creator?.email || extra.creatorEmail || '',
-            members:        extra.members        || [],
-            memberNames:    extra.memberNames     || {},
-            pendingInvites: extra.pendingInvites  || [],
+            members,
+            memberNames,
+            pendingInvites,
             productOwner:   extra.productOwner    || '',
             productOwnerId: extra.productOwnerId  || null,
             scrumMaster:    extra.scrumMaster     || '',
@@ -221,12 +259,7 @@ const Storage = {
             dailyScrums:    extra.dailyScrums     || [],
             retrospectives: extra.retrospectives  || [],
             myRole:         p.myRole              || 'member',
-            _backendMembers: (p.project_members || []).map(m => ({
-                userId: m.users?.id,
-                name:   m.users?.name,
-                email:  m.users?.email,
-                role:   m.role,
-            })),
+            _backendMembers: backendMembers,
         };
     },
 
