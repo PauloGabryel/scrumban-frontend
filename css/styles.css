@@ -1810,7 +1810,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 .project-title-section h2 { font-size: 1.35rem; }
 
 /* ── User display: hide name, show only avatar on mobile ── */
-.nav-user-name { display: none; }
+.nav-user-name { display: none !important; }
 .user-display  { margin-right: var(--space-sm); padding: var(--space-xs) var(--space-sm); }
 
 /* ── Header-right: tighter gap ── */
@@ -1860,7 +1860,7 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
     #darkModeLabel       { display: inline; }
     #btnDarkMode         { padding: 6px 12px !important; }
     .btn-icon            { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
-    .nav-user-name       { display: inline; }
+    .nav-user-name       { display: none !important; }
 
     .main-content   { padding: var(--space-xl); }
     .home-hero      { padding: var(--space-2xl) 0 var(--space-xl); }
@@ -2199,15 +2199,10 @@ button, [role="button"], a, input[type="submit"], input[type="button"] {
 .user-display {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    background: rgba(255,255,255,0.12);
-    color: #fff;
-    border-radius: var(--radius-full);
-    font-weight: 500;
-    font-size: 0.9rem;
-    margin-right: var(--space-md);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: var(--space-sm);
 }
 
 
