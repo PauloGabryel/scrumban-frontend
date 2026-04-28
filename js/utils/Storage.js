@@ -82,9 +82,14 @@ const Storage = {
                 const res = await this._fetch(`/projects/${project.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({
-                        name:        project.name,
-                        description: project.description || '',
-                        data:        project,
+                        // FIX: Only send name/description if explicitly flagged (rename)
+                        // Regular data saves (backlog, sprints, kanban) must NOT include them
+                        // to allow non-admin members to save project data
+                        ...(project._saveNameDesc ? {
+                            name:        project.name,
+                            description: project.description || '',
+                        } : {}),
+                        data: project,
                     }),
                 });
                 if (!res) return { ok: false, message: 'Sem resposta do servidor.' };

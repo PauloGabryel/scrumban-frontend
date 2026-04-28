@@ -27,8 +27,8 @@ const ProjectView = {
             </div>
             <div class="project-tabs" id="projectTabs">
                 ${this._tabBtn('team','Equipe',`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>`)}
-                ${this._tabBtn('backlog','Product Backlog',`<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>`, p.backlog.length)}
-                ${this._tabBtn('sprints','Sprints',`<polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline>`, p.sprints.length)}
+                ${this._tabBtn('backlog','Product Backlog',`<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>`, (p.backlog || []).length)}
+                ${this._tabBtn('sprints','Sprints',`<polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline>`, (p.sprints || []).length)}
                 ${this._tabBtn('kanban','Kanban',`<rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="12" rx="1"></rect>`)}
                 ${this._tabBtn('ceremonies','Cerimônias',`<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>`)}
             </div>
@@ -271,16 +271,18 @@ const ProjectView = {
             pairsHtml += `
                 <div class="dev-pair">
                     <span class="dev-pair-label">Par ${idx + 1}</span>
+                    <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
                     <select class="role-select" onchange="ProjectView.updatePair('${pair.id}','dev1Id',this.value)">
                         ${blankOption}
                         ${members.map(m => `<option value="${this._esc(m.userId)}" ${pair.dev1Id === m.userId ? 'selected' : ''}>${this._esc(m.name)}</option>`).join('')}
                     </select>
-                    <select class="role-select" style="margin-top:6px" onchange="ProjectView.updatePair('${pair.id}','dev2Id',this.value)">
+                    <select class="role-select" onchange="ProjectView.updatePair('${pair.id}','dev2Id',this.value)">
                         ${blankOption}
                         ${members.map(m => `<option value="${this._esc(m.userId)}" ${pair.dev2Id === m.userId ? 'selected' : ''}>${this._esc(m.name)}</option>`).join('')}
                     </select>
+                    </div>
                     ${p.devPairs.length > 1 ? `
-                    <button class="btn-icon" style="margin-top:4px" onclick="ProjectView.removePair('${pair.id}')" title="Remover par">
+                    <button class="btn-icon" onclick="ProjectView.removePair('${pair.id}')" title="Remover par">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
