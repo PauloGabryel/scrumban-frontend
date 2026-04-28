@@ -3847,3 +3847,44 @@ body.dark-mode .btn-notif-decline:hover {
     background: rgba(220,38,38,0.18) !important;
     color: #f87171 !important;
 }
+/* ── Dark mode — Cerimônias unificadas ── */
+body.dark-mode .ceremony-entry {
+    background: var(--dm-surface) !important;
+    border: 1px solid var(--dm-border) !important;
+    border-radius: 10px;
+}
+body.dark-mode .ceremony-entry-header {
+    border-bottom: 1px solid var(--dm-border) !important;
+}
+body.dark-mode .ceremony-entry-date {
+    color: var(--dm-muted) !important;
+}
+body.dark-mode .daily-answers {
+    background: var(--dm-elevated) !important;
+    border: 1px solid var(--dm-border) !important;
+    border-radius: 8px !important;
+}
+body.dark-mode .daily-question {
+    background: var(--dm-surface) !important;
+    border-radius: 6px;
+}
+body.dark-mode .daily-question label {
+    color: var(--dm-muted) !important;
+}
+body.dark-mode .daily-question p {
+    color: var(--dm-text) !important;
+}
+body.dark-mode .retro-column.went-well,
+body.dark-mode .retro-column.improve,
+body.dark-mode .retro-column.action {
+    background: var(--dm-surface) !important;
+    border-color: var(--dm-border) !important;
+}
+body.dark-mode .retro-column h5 {
+    color: var(--dm-text-strong) !important;
+}
+body.dark-mode .retro-item {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text) !important;
+}

@@ -222,8 +222,8 @@ const CeremonyView = {
         App.showModal('Registrar Daily Scrum (15 min)', `
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Data</label>
-                    <input type="date" class="form-input" id="dailyDate" value="${today}">
+                    <label>Data *</label>
+                    <input type="date" class="form-input" id="dailyDate" value="${today}" min="2000-01-01" max="${today}" oninput="CeremonyView._clampDate(this,'${today}')">
                 </div>
                 <hr class="section-divider" style="margin:var(--space-md) 0;">
                 ${participantsHtml}
@@ -239,21 +239,51 @@ const CeremonyView = {
         const p = ProjectView.currentProject;
         const date = document.getElementById('dailyDate').value;
 
+        // Validação de data
+        if (!date) {
+            App.toast('Informe a data da Daily', 'warning');
+            return;
+        }
+        if (!CeremonyView._isValidDate(date)) {
+            App.toast('Data inválida. Verifique o dia e mês informados', 'warning');
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        if (date > today) {
+            App.toast('A data não pode ser no futuro', 'warning');
+            return;
+        }
+
         const entries = [];
-        const yesterdays = document.querySelectorAll('.daily-yesterday');
-        const todays = document.querySelectorAll('.daily-today');
-        const impediments = document.querySelectorAll('.daily-impediments');
+        const yesterdays   = document.querySelectorAll('.daily-yesterday');
+        const todays       = document.querySelectorAll('.daily-today');
+        const impediments  = document.querySelectorAll('.daily-impediments');
+
+        // Validar que pelo menos um participante tem "ontem" ou "hoje" preenchido
+        let algumPreenchido = false;
+        yesterdays.forEach((input, idx) => {
+            const y = input.value.trim();
+            const t = todays[idx] ? todays[idx].value.trim() : '';
+            if (y || t) algumPreenchido = true;
+        });
+        if (!algumPreenchido) {
+            App.toast('Preencha pelo menos "O que fez ontem" ou "O que vai fazer hoje" para um participante', 'warning');
+            return;
+        }
 
         yesterdays.forEach((input, idx) => {
             let name = input.dataset.name;
             if (name === 'manual') {
                 const manualInput = document.getElementById('dailyParticipant');
-                name = manualInput ? manualInput.value.trim() : 'Participante';
+                name = manualInput ? manualInput.value.trim() : '';
+                if (!name) {
+                    name = 'Participante';
+                }
             }
             entries.push({
                 name,
-                yesterday: input.value.trim(),
-                today: todays[idx] ? todays[idx].value.trim() : '',
+                yesterday:   input.value.trim(),
+                today:       todays[idx] ? todays[idx].value.trim() : '',
                 impediments: impediments[idx] ? impediments[idx].value.trim() : ''
             });
         });
@@ -298,8 +328,8 @@ const CeremonyView = {
                         <select class="form-select" id="retroSprint">${sprintOptions}</select>
                     </div>
                     <div class="form-group">
-                        <label>Data</label>
-                        <input type="date" class="form-input" id="retroDate" value="${today}">
+                        <label>Data *</label>
+                        <input type="date" class="form-input" id="retroDate" value="${today}" min="2000-01-01" max="${today}" oninput="CeremonyView._clampDate(this,'${today}')">
                     </div>
                 </div>
 
@@ -398,9 +428,34 @@ const CeremonyView = {
     saveRetro() {
         const p = ProjectView.currentProject;
         const sprintSelect = document.getElementById('retroSprint');
-        const sprintId = sprintSelect.value;
-        const sprintName = sprintSelect.options[sprintSelect.selectedIndex]?.dataset?.name || '';
-        const date = document.getElementById('retroDate').value;
+        const sprintId     = sprintSelect.value;
+        const sprintName   = sprintSelect.options[sprintSelect.selectedIndex]?.dataset?.name || '';
+        const date         = document.getElementById('retroDate').value;
+
+        // Validações obrigatórias
+        if (!sprintId) {
+            App.toast('Selecione a Sprint da retrospectiva', 'warning');
+            return;
+        }
+        if (!date) {
+            App.toast('Informe a data da retrospectiva', 'warning');
+            return;
+        }
+        if (!CeremonyView._isValidDate(date)) {
+            App.toast('Data inválida. Verifique o dia e mês informados', 'warning');
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        if (date > today) {
+            App.toast('A data não pode ser no futuro', 'warning');
+            return;
+        }
+
+        const totalItens = this._retroData.wentWell.length + this._retroData.improve.length + this._retroData.actions.length;
+        if (totalItens === 0) {
+            App.toast('Adicione pelo menos um item em "O que funcionou", "O que melhorar" ou "Ações"', 'warning');
+            return;
+        }
 
         const retro = new Retrospective({
             sprintId,
@@ -425,5 +480,30 @@ const CeremonyView = {
         App.toast('Retrospectiva removida', 'info');
         ProjectView.refreshProject();
         ProjectView.refreshTab();
+    },
+
+    // Limita o ano a 4 dígitos e impede datas futuras em tempo real
+    _clampDate(input, maxDate) {
+        const val = input.value;
+        if (!val) return;
+        const parts = val.split('-');
+        if (parts[0] && parts[0].length > 4) {
+            parts[0] = parts[0].slice(0, 4);
+            input.value = parts.join('-');
+        }
+        if (input.value && input.value > maxDate) {
+            input.value = maxDate;
+        }
+    },
+
+    // Verifica se uma data YYYY-MM-DD é de fato válida (sem dias/meses impossíveis)
+    _isValidDate(str) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
+        const [y, m, d] = str.split('-').map(Number);
+        const dt = new Date(str);
+        return !isNaN(dt.getTime()) &&
+               dt.getFullYear() === y &&
+               dt.getMonth() + 1 === m &&
+               dt.getDate() === d;
     }
 };
