@@ -207,11 +207,11 @@ const SprintView = {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Data de Início</label>
-                        <input type="date" class="form-input" id="sprintStart" value="${today}" min="${today}">
+                        <input type="date" class="form-input" id="sprintStart" value="${today}" min="${today}" max="2099-12-31" oninput="SprintView._clampDate(this,'${today}')">
                     </div>
                     <div class="form-group">
                         <label>Data de Término</label>
-                        <input type="date" class="form-input" id="sprintEnd" value="${twoWeeks}" min="${today}">
+                        <input type="date" class="form-input" id="sprintEnd" value="${twoWeeks}" min="${today}" max="2099-12-31" oninput="SprintView._clampDate(this,'${today}')">
                     </div>
                 </div>
                 <p class="text-xs text-muted">💡 Sprints devem ter duração de 2 a 4 semanas.</p>
@@ -231,28 +231,63 @@ const SprintView = {
         }
 
         const startDate = document.getElementById('sprintStart').value;
-        const endDate = document.getElementById('sprintEnd').value;
+        const endDate   = document.getElementById('sprintEnd').value;
 
         if (!startDate || !endDate) {
             App.toast('Data de início e término são obrigatórias', 'warning');
             return;
         }
 
-        // Block past dates
-        const todayStr = new Date().toISOString().split('T')[0];
-        if (startDate < todayStr) {
+        // Validação robusta: checar se a data é real (formato YYYY-MM-DD)
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+            App.toast('Formato de data inválido', 'warning');
+            return;
+        }
+
+        const start = new Date(startDate);
+        const end   = new Date(endDate);
+
+        // Checar se as datas são válidas de verdade (ex: 22/22 vira Invalid Date)
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            App.toast('Data inválida. Verifique o dia e mês informados', 'warning');
+            return;
+        }
+
+        // Garantir que o mês e dia não extrapolaram (ex: 2024-02-30 JS converte, mas não deve)
+        const [sy, sm, sd] = startDate.split('-').map(Number);
+        const [ey, em, ed] = endDate.split('-').map(Number);
+        if (start.getFullYear() !== sy || start.getMonth()+1 !== sm || start.getDate() !== sd) {
+            App.toast('Data de início inválida (dia ou mês fora do intervalo)', 'warning');
+            return;
+        }
+        if (end.getFullYear() !== ey || end.getMonth()+1 !== em || end.getDate() !== ed) {
+            App.toast('Data de término inválida (dia ou mês fora do intervalo)', 'warning');
+            return;
+        }
+
+        // Bloquear datas passadas
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (start < today) {
             App.toast('A data de início não pode ser no passado', 'warning');
             return;
         }
-        if (endDate < todayStr) {
+        if (end < today) {
             App.toast('A data de término não pode ser no passado', 'warning');
             return;
         }
 
-        // Validate 2-4 weeks
-        const diffDays = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
+        // Fim deve ser depois do início
+        if (end <= start) {
+            App.toast('A data de término deve ser depois da data de início', 'warning');
+            return;
+        }
+
+        // Validar 2 a 4 semanas
+        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
         if (diffDays < 14 || diffDays > 28) {
-            App.toast('A sprint deve ter entre 2 e 4 semanas (14-28 dias)', 'warning');
+            App.toast('A sprint deve ter entre 2 e 4 semanas (14–28 dias)', 'warning');
             return;
         }
 
@@ -452,5 +487,21 @@ const SprintView = {
         App.toast('Sprint concluída! Hora da retrospectiva. 🎉', 'success');
         ProjectView.refreshProject();
         ProjectView.refreshTab();
+    },
+
+    // Impede digitação de datas inválidas ou no passado em tempo real
+    _clampDate(input, minDate) {
+        const val = input.value;
+        if (!val) return;
+        // Limita o ano a 4 dígitos (evita 222222)
+        const parts = val.split('-');
+        if (parts[0] && parts[0].length > 4) {
+            parts[0] = parts[0].slice(0, 4);
+            input.value = parts.join('-');
+        }
+        // Se a data resultante for anterior ao mínimo, corrige
+        if (input.value && input.value < minDate) {
+            input.value = minDate;
+        }
     }
 };
