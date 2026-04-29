@@ -280,9 +280,13 @@ const App = {
                 // Lua (modo claro ativo → clicar vai para escuro)
                 : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
         }
-        // Label mobile ("Modo Claro" / "Modo Escuro")
-        const label = document.getElementById('darkModeLabel');
-        if (label) label.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+        // Label mobile: atualiza o nó de texto direto dentro do botão
+        const mobileBtn = document.getElementById('mobileDarkMode');
+        if (mobileBtn) {
+            // Acha o último nó de texto (após o SVG) e atualiza
+            const textNode = Array.from(mobileBtn.childNodes).find(n => n.nodeType === 3 && n.textContent.trim());
+            if (textNode) textNode.textContent = isDark ? '\n                Modo Claro\n            ' : '\n                Modo Escuro\n            ';
+        }
         // Tooltip desktop
         const btn = document.getElementById('btnDarkMode');
         if (btn) btn.title = isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro';
