@@ -226,7 +226,7 @@ const KanbanView = {
             timestamp: new Date().toISOString()
         });
         p.updateSprint(sprintId, { tasks: sprint.tasks });
-        p.save(); // Persistir movimento de tarefa
+        await p.save(); // Persistir movimento de tarefa
 
         const statusLabels = { todo: 'A Fazer', inProgress: 'Em Andamento', review: 'Revisão', done: 'Concluído' };
         App.toast(`Tarefa movida para "${statusLabels[newStatus]}"`, 'success');
@@ -237,7 +237,7 @@ const KanbanView = {
     async updateWipLimit(column, value) {
         const p = ProjectView.currentProject;
         p.wipLimits[column] = parseInt(value) || 0;
-        p.save();
+        await p.save();
         await ProjectView.refreshTab();
     },
 
@@ -348,7 +348,7 @@ const KanbanView = {
         `);
     },
 
-    addComment(sprintId, taskId) {
+    async addComment(sprintId, taskId) {
         const input = document.getElementById('taskCommentInput');
         const text = input.value.trim();
         if (!text) return;
@@ -367,7 +367,7 @@ const KanbanView = {
         });
 
         p.updateSprint(sprintId, { tasks: sprint.tasks });
-        p.save(); // Persistir comentário
+        await p.save(); // Persistir comentário
         ProjectView.refreshProject();
 
         // Refresh modal
@@ -375,7 +375,7 @@ const KanbanView = {
         this.showTaskDetail(sprintId, taskId);
     },
 
-    saveTaskDetail(sprintId, taskId) {
+    async saveTaskDetail(sprintId, taskId) {
         const newStatus = document.getElementById('taskDetailStatus').value;
         const newPairId = document.getElementById('taskDetailPair').value;
 
@@ -447,7 +447,7 @@ const KanbanView = {
         }
 
         p.updateSprint(sprintId, { tasks: sprint.tasks });
-        p.save(); // Persistir atualização de tarefa
+        await p.save(); // Persistir atualização de tarefa
         App.closeModal();
         App.toast('Tarefa atualizada!', 'success');
         ProjectView.refreshProject();

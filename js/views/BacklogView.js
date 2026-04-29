@@ -199,7 +199,7 @@ const BacklogView = {
             p.addBacklogItem(item.toJSON());
             App.toast('Item adicionado ao backlog!', 'success');
         }
-        p.save(); // Persistir alterações no backlog
+        await p.save(); // Persistir alterações no backlog
 
         App.closeModal();
         await ProjectView.refreshTab();
@@ -231,10 +231,10 @@ const BacklogView = {
         `);
     },
 
-    _confirmDelete(itemId) {
+    async _confirmDelete(itemId) {
         const p = ProjectView.currentProject;
         p.removeBacklogItem(itemId);
-        p.save();
+        await p.save();
         App.closeModal();
         App.toast('Item removido do backlog', 'info');
         await ProjectView.refreshTab();

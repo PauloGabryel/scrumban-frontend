@@ -310,7 +310,7 @@ const SprintView = {
 
         const p = ProjectView.currentProject;
         p.addSprint(sprint.toJSON());
-        p.save(); // Garantir que o projeto foi salvo
+        await p.save(); // Garantir que o projeto foi salvo
 
         this.selectedSprintId = sprint.id;
         App.closeModal();
@@ -440,7 +440,7 @@ const SprintView = {
             sprint.tasks.push(task.toJSON());
             p.updateSprint(sprintId, { tasks: sprint.tasks });
         }
-        p.save(); // Persistir adição de tarefa
+        await p.save(); // Persistir adição de tarefa
 
         App.closeModal();
         App.toast('Tarefa adicionada à sprint!', 'success');
@@ -468,7 +468,7 @@ const SprintView = {
             sprint.tasks = sprint.tasks.filter(t => t.id !== taskId);
             p.updateSprint(sprintId, { tasks: sprint.tasks });
         }
-        p.save(); // Persistir remoção de tarefa
+        await p.save(); // Persistir remoção de tarefa
         App.toast('Tarefa removida', 'info');
         await ProjectView.refreshTab();
     },
@@ -484,7 +484,7 @@ const SprintView = {
         });
         
         p.updateSprint(sprintId, { status: 'active' });
-        p.save(); // Persistir início de sprint
+        await p.save(); // Persistir início de sprint
         App.toast('Sprint iniciada! 🚀', 'success');
         await ProjectView.refreshTab();
     },
@@ -492,7 +492,7 @@ const SprintView = {
     async completeSprint(sprintId) {
         const p = ProjectView.currentProject;
         p.updateSprint(sprintId, { status: 'completed' });
-        p.save(); // Persistir a conclusão da sprint
+        await p.save(); // Persistir a conclusão da sprint
         App.toast('Sprint concluída! Hora da retrospectiva. 🎉', 'success');
         await ProjectView.refreshTab();
     },

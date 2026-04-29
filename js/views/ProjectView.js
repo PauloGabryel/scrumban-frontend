@@ -48,10 +48,16 @@ const ProjectView = {
     async switchTab(tab) {
         this.activeTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        const content = document.getElementById('tabContent');
-        content.innerHTML = '<div style="padding:40px;text-align:center;color:#949ba4;">Carregando...</div>';
-        content.innerHTML = this.renderActiveTab();
+        // Re-marcar o botão ativo (pode ter sido re-renderizado pelo _updateTabBadges)
+        const activeBtn = document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        const contentEl = document.getElementById('tabContent');
+        try {
+            contentEl.innerHTML = this.renderActiveTab();
+        } catch(e) {
+            console.error('Erro ao renderizar aba:', e);
+            contentEl.innerHTML = '<div style="padding:40px;text-align:center;color:#ef4444;">Erro ao carregar aba. Tente novamente.</div>';
+        }
         if (tab === 'team') this._loadMemberGravatars();
     },
 
@@ -103,7 +109,7 @@ const ProjectView = {
                     if (name) {
                         if (!p.memberNames) p.memberNames = {};
                         p.memberNames[uid] = name;
-                        p.save();
+                        p.save(); // fire-and-forget: salva retroativamente
                     }
                 }
             }
@@ -399,35 +405,35 @@ const ProjectView = {
     // -----------------------------------------------
     // ROLE ACTIONS
     // -----------------------------------------------
-    updateRoleFromSelect(nameField, idField, selectEl) {
+    async updateRoleFromSelect(nameField, idField, selectEl) {
         const selectedOpt = selectEl.options[selectEl.selectedIndex];
         const userId = selectEl.value;
         const name   = userId ? (selectedOpt.getAttribute('data-name') || selectedOpt.text) : '';
         this.currentProject[idField]   = userId || null;
         this.currentProject[nameField] = name;
-        this.currentProject.save();
+        await this.currentProject.save();
         App.toast('Cargo atualizado', 'success');
     },
 
-    updateRole(role, value) {
+    async updateRole(role, value) {
         this.currentProject[role] = value.trim();
-        this.currentProject.save();
+        await this.currentProject.save();
         App.toast('Cargo atualizado', 'success');
     },
 
-    addPair() {
+    async addPair() {
         this.currentProject.devPairs.push({ id: Storage.generateId(), dev1Id: null, dev1: '', dev2Id: null, dev2: '' });
-        this.currentProject.save();
+        await this.currentProject.save();
         this.refreshTab();
     },
 
-    removePair(pairId) {
+    async removePair(pairId) {
         this.currentProject.devPairs = this.currentProject.devPairs.filter(p => p.id !== pairId);
-        this.currentProject.save();
+        await this.currentProject.save();
         this.refreshTab();
     },
 
-    updatePair(pairId, field, value) {
+    async updatePair(pairId, field, value) {
         const pair = this.currentProject.devPairs.find(p => p.id === pairId);
         if (!pair) return;
         pair[field] = value || null;
@@ -441,7 +447,7 @@ const ProjectView = {
             const m = members.find(m => m.userId === value);
             pair.dev2 = m ? m.name : '';
         }
-        this.currentProject.save();
+        await this.currentProject.save();
     },
 
     // -----------------------------------------------
@@ -563,11 +569,14 @@ const ProjectView = {
 
     async refreshTab() {
         // Recarrega dados frescos do backend antes de re-renderizar
-        await this.refreshProject();
+        try { await this.refreshProject(); } catch(e) { /* usa dados locais em caso de falha */ }
         // Atualiza os badges de contagem nas abas (backlog, sprints)
         this._updateTabBadges();
-        document.getElementById('tabContent').innerHTML = this.renderActiveTab();
-        if (this.activeTab === 'team') this._loadMemberGravatars();
+        const tabContent = document.getElementById('tabContent');
+        if (tabContent) {
+            tabContent.innerHTML = this.renderActiveTab();
+            if (this.activeTab === 'team') this._loadMemberGravatars();
+        }
     },
 
     _updateTabBadges() {

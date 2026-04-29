@@ -36,9 +36,9 @@ class Project {
     }
 
     // ---- Persistência ----
-    save() {
+    async save() {
         this.updatedAt = new Date().toISOString();
-        Storage.saveProject(this.toJSON());
+        await Storage.saveProject(this.toJSON());
     }
 
     toJSON() {
@@ -132,14 +132,14 @@ class Project {
     // ---- Cerimônias ----
     addCeremony(ceremony) {
         this.ceremonies.push(ceremony);
-        this.save();
+        // Não chama save() aqui — o caller já chama p.save()
     }
 
     updateCeremony(ceremonyId, changes) {
         const idx = this.ceremonies.findIndex(c => c.id === ceremonyId);
         if (idx !== -1) {
             this.ceremonies[idx] = { ...this.ceremonies[idx], ...changes };
-            this.save();
+            // Não chama save() aqui — o caller já chama p.save()
         }
     }
 
@@ -147,14 +147,14 @@ class Project {
     addDailyScrum(daily) {
         if (!this.dailyScrums) this.dailyScrums = [];
         this.dailyScrums.unshift(daily);
-        this.save();
+        // Não chama save() aqui — o caller já chama p.save()
     }
 
     // ---- Retrospectivas ----
     addRetrospective(retro) {
         if (!this.retrospectives) this.retrospectives = [];
         this.retrospectives.unshift(retro);
-        this.save();
+        // Não chama save() aqui — o caller já chama p.save()
     }
 
     // ---- Helpers de Dupla ----
