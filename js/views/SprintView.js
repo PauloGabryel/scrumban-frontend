@@ -201,8 +201,8 @@ const SprintView = {
                     <input type="text" class="form-input" id="sprintName" value="Sprint ${sprintNumber}" placeholder="Ex: Sprint 1">
                 </div>
                 <div class="form-group">
-                    <label>Meta da Sprint</label>
-                    <textarea class="form-textarea" id="sprintGoal" placeholder="O que queremos alcançar nesta sprint?"></textarea>
+                    <label>Meta da Sprint *</label>
+                    <textarea class="form-textarea" id="sprintGoal" placeholder="O que queremos alcançar nesta sprint? (obrigatório)"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -223,10 +223,16 @@ const SprintView = {
         `);
     },
 
-    createSprint() {
+    async createSprint() {
         const name = document.getElementById('sprintName').value.trim();
         if (!name) {
             App.toast('Informe o nome da sprint', 'warning');
+            return;
+        }
+
+        const goal = document.getElementById('sprintGoal').value.trim();
+        if (!goal) {
+            App.toast('Informe a meta da sprint', 'warning');
             return;
         }
 
@@ -309,8 +315,7 @@ const SprintView = {
         this.selectedSprintId = sprint.id;
         App.closeModal();
         App.toast('Sprint criada! Agora adicione tarefas do backlog.', 'success');
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
     showAddTaskModal(sprintId) {
@@ -382,7 +387,7 @@ const SprintView = {
         }
     },
 
-    addTask(sprintId) {
+    async addTask(sprintId) {
         const p = ProjectView.currentProject;
         
         // Verificar permissão: apenas SM pode adicionar tarefas
@@ -397,8 +402,13 @@ const SprintView = {
         const title = document.getElementById('taskTitle').value.trim();
         const pairId = document.getElementById('taskPair').value;
 
+        if (!backlogItemId) {
+            App.toast('Selecione um item do backlog', 'warning');
+            return;
+        }
+
         if (!title) {
-            App.toast('Informe o título da tarefa', 'warning');
+            App.toast('Informe o título da subtarefa', 'warning');
             return;
         }
 
@@ -434,11 +444,10 @@ const SprintView = {
 
         App.closeModal();
         App.toast('Tarefa adicionada à sprint!', 'success');
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
-    deleteTask(sprintId, taskId) {
+    async deleteTask(sprintId, taskId) {
         const p = ProjectView.currentProject;
         
         // Verificar permissão: apenas SM pode remover tarefas
@@ -461,11 +470,10 @@ const SprintView = {
         }
         p.save(); // Persistir remoção de tarefa
         App.toast('Tarefa removida', 'info');
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
-    startSprint(sprintId) {
+    async startSprint(sprintId) {
         const p = ProjectView.currentProject;
         
         // Deactivate other sprints (set to planning, not all to planning)
@@ -478,17 +486,15 @@ const SprintView = {
         p.updateSprint(sprintId, { status: 'active' });
         p.save(); // Persistir início de sprint
         App.toast('Sprint iniciada! 🚀', 'success');
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
-    completeSprint(sprintId) {
+    async completeSprint(sprintId) {
         const p = ProjectView.currentProject;
         p.updateSprint(sprintId, { status: 'completed' });
         p.save(); // Persistir a conclusão da sprint
         App.toast('Sprint concluída! Hora da retrospectiva. 🎉', 'success');
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
     // Impede digitação de datas inválidas ou no passado em tempo real

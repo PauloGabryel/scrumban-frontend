@@ -175,7 +175,7 @@ const BacklogView = {
         `);
     },
 
-    saveItem(editId) {
+    async saveItem(editId) {
         const title = document.getElementById('itemTitle').value.trim();
         if (!title) {
             App.toast('Informe o título do item', 'warning');
@@ -202,8 +202,7 @@ const BacklogView = {
         p.save(); // Persistir alterações no backlog
 
         App.closeModal();
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
     editItem(itemId) {
@@ -214,7 +213,7 @@ const BacklogView = {
         }
     },
 
-    deleteItem(itemId) {
+    async deleteItem(itemId) {
         App.showModal('Confirmar Exclusão', `
             <div class="modal-body">
                 <p style="text-align:center;padding:16px 0;">
@@ -238,7 +237,6 @@ const BacklogView = {
         p.save();
         App.closeModal();
         App.toast('Item removido do backlog', 'info');
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     }
 };

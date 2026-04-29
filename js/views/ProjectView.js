@@ -564,8 +564,28 @@ const ProjectView = {
     async refreshTab() {
         // Recarrega dados frescos do backend antes de re-renderizar
         await this.refreshProject();
+        // Atualiza os badges de contagem nas abas (backlog, sprints)
+        this._updateTabBadges();
         document.getElementById('tabContent').innerHTML = this.renderActiveTab();
         if (this.activeTab === 'team') this._loadMemberGravatars();
+    },
+
+    _updateTabBadges() {
+        const p = this.currentProject;
+        if (!p) return;
+        const tabsEl = document.getElementById('projectTabs');
+        if (!tabsEl) return;
+        // Re-renderiza apenas a barra de abas para atualizar os badges sem perder o conteúdo
+        const backlogCount = (p.backlog || []).length;
+        const sprintCount  = (p.sprints || []).length;
+        const tabDefs = [
+            { id: 'team',       label: 'Equipe',           badge: null,         icon: `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>` },
+            { id: 'backlog',    label: 'Product Backlog',  badge: backlogCount, icon: `<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>` },
+            { id: 'sprints',    label: 'Sprints',          badge: sprintCount,  icon: `<polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline>` },
+            { id: 'kanban',     label: 'Kanban',           badge: null,         icon: `<rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="12" rx="1"></rect>` },
+            { id: 'ceremonies', label: 'Cerimônias',       badge: null,         icon: `<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>` },
+        ];
+        tabsEl.innerHTML = tabDefs.map(t => this._tabBtn(t.id, t.label, t.icon, t.badge)).join('');
     },
 
     async refreshProject() {

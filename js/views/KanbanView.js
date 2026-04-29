@@ -170,7 +170,7 @@ const KanbanView = {
         this.moveTask(this.draggedSprintId, this.draggedTaskId, newStatus);
     },
 
-    moveTask(sprintId, taskId, newStatus) {
+    async moveTask(sprintId, taskId, newStatus) {
         const p = ProjectView.currentProject;
         const sprint = p.sprints.find(s => s.id === sprintId);
         if (!sprint) return;
@@ -231,16 +231,14 @@ const KanbanView = {
         const statusLabels = { todo: 'A Fazer', inProgress: 'Em Andamento', review: 'Revisão', done: 'Concluído' };
         App.toast(`Tarefa movida para "${statusLabels[newStatus]}"`, 'success');
 
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
-    updateWipLimit(column, value) {
+    async updateWipLimit(column, value) {
         const p = ProjectView.currentProject;
         p.wipLimits[column] = parseInt(value) || 0;
         p.save();
-        ProjectView.refreshProject();
-        ProjectView.refreshTab();
+        await ProjectView.refreshTab();
     },
 
     showTaskDetail(sprintId, taskId) {
